@@ -24,7 +24,7 @@
     (dom/input
       (clj->js
         {:type        (:type opts)
-         :value       (:value data)
+         :value       (om/get-state owner :value)
          :className   (:class opts)
          :placeholder (:placeholder opts)
          :onChange    (on-change owner)

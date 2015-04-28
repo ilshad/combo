@@ -5,16 +5,21 @@
             [om.dom :as dom :include-macros true]
             [combo.layout :as layout]
             [combo.widget :as widget]
-            [combo.core :as combo]))
+            [combo.core :refer [combo]]))
 
 (enable-console-print!)
 
+(defn- validate [s]
+  (when (< (count s) 10)
+    s))
+
 (defn view [data]
-  (om/build combo/view data
+  (om/build combo data
     {:opts {:layout layout/basic-form
             :widgets [{:name :username
                        :render widget/input
-                       :type "text"}]}}))
+                       :type "text"
+                       :handler validate}]}}))
 
 (defn- row [content]
   (dom/div #js {:className "row"}
@@ -29,7 +34,7 @@
         (dom/div #js {:className "container"}
           (dom/h1 nil "Combo Examples")
           (row (view data)))))
-    (atom {})
+    (atom {:username {:value "Foo"}})
     {:target js/document.body}))
 
 (set! (.-onload js/window) main)
