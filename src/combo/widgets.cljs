@@ -19,14 +19,22 @@
       (async/put! (om/get-state owner :return-chan) [entity attr key-code])
       (.preventDefault e))))
 
+(defn- attrs-basic [owner opts]
+  {:value     (om/get-state owner :value)
+   :className (:class opts)
+   :onChange  (on-change owner)
+   :onFocus   (focus? true  (:entity opts) owner)
+   :onBlur    (focus? false (:entity opts) owner)})
+
+(defn- attrs-input [owner opts]
+  {:type        (:type opts)
+   :placeholder (:placeholder opts)})
+
 (defn input [owner opts]
-  (dom/input
-    (clj->js
-      {:type        (:type opts)
-       :value       (om/get-state owner :value)
-       :className   (:class opts)
-       :placeholder (:placeholder opts)
-       :onChange    (on-change owner)
-       :onFocus     (focus? true (:entity opts) owner)
-       :onBlur      (focus? false (:entity opts) owner)
-       :onKeyDown   (key-code-return (:entity opts) :key-down 13 owner)})))
+  (dom/input (clj->js (merge (attrs-basic owner opts)
+                             (attrs-input owner opts)))))
+
+(defn select [owner opts]
+  (apply dom/select (clj->js (attrs-basic owner opts))
+    (for [[k v] (om/get-state owner :options)]
+      (dom/option #js {:value k} v))))

@@ -17,12 +17,12 @@
       (let [change-chan (om/get-state owner :change-chan)
             return-chan (om/get-state owner :return-chan)
             update-chan (om/get-state owner :update-chan)
-            handler (:handler opts identity)]
+            interceptor (:interceptor opts identity)]
         (go-loop []
           (alt!
             change-chan
             ([v]
-             (if-let [v (handler v)]
+             (if-let [v (interceptor v)]
                (do (om/set-state! owner :value v)
                    (async/>! return-chan [(:entity opts) :value v]))
                (om/refresh! owner)))
@@ -35,21 +35,27 @@
     (render [_]
       ((:render opts) owner opts))))
 
+(defn- widget-init-state [data spec]
+  (let [v (get data (:entity spec))]
+    (if (map? v)
+      (select-keys v [:value :options])
+      {:value v})))
+
 (defn combo [data owner opts]
   (reify
 
     om/IInitState
     (init-state [_]
       (let [update-chan (async/chan)]
-        {:fields-update-chan update-chan
-         :fields-update-pub  (async/pub update-chan first)
-         :fields-return-chan (async/chan)}))
+        {:update-chan update-chan
+         :update-pub  (async/pub update-chan first)
+         :return-chan (async/chan)}))
 
     om/IWillMount
     (will-mount [_]
       (let [behavior (:behavior opts (fn [_ s] [[] s]))
-            return-chan (om/get-state owner :fields-return-chan)
-            update-chan (om/get-state owner :fields-update-chan)]
+            return-chan (om/get-state owner :return-chan)
+            update-chan (om/get-state owner :update-chan)]
         (go-loop [state {}]
           (let [[messages new-state] (behavior (async/<! return-chan) state)]
             (doseq [m messages]
@@ -58,15 +64,14 @@
 
     om/IRenderState
     (render-state [_ state]
-      (let [layout (:layout opts layouts/dumb)
-            pub (om/get-state owner :fields-update-pub)]
+      (let [layout (:layout opts layouts/dumb)]
         (layout
-          (fn [widget-opts]
+          (fn [spec]
             (let [update-chan (async/chan)]
-              (async/sub pub (:entity widget-opts) update-chan)
+              (async/sub (:update-pub state) (:entity spec) update-chan)
               (om/build widget nil
-                {:init-state {:value (data (:entity widget-opts))
-                              :return-chan (:fields-return-chan state)
-                              :update-chan update-chan}
-                 :opts widget-opts})))
+                {:init-state (-> (widget-init-state data spec)
+                                 (assoc :return-chan (:return-chan state)
+                                        :update-chan update-chan))
+                 :opts spec})))
           opts)))))

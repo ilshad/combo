@@ -10,13 +10,16 @@
 (enable-console-print!)
 
 (defn- validate [s]
-  (when (< (count s) 10)
+  (when (< (count s) 20)
     s))
 
 (defn behavior [[entity attr value] state]
   (println entity attr value state)
   (case attr
     :value [[] (assoc state entity value)]
+    :focus? (if (and value (= entity :username))
+              [[[entity :value "->"]] state]
+              [[] state])
     [[] state]))
 
 (defn view [data]
@@ -26,10 +29,13 @@
             :widgets [{:entity :username
                        :render widgets/input
                        :type "text"
-                       :handler validate}
+                       :interceptor validate}
                       {:entity :password
                        :render widgets/input
-                       :type "password"}]}}))
+                       :type "password"}
+                      {:entity :city
+                       :render widgets/select
+                       :label "Select your city"}]}}))
 
 (defn- row [content]
   (dom/div #js {:className "row"}
@@ -44,7 +50,12 @@
         (dom/div #js {:className "container"}
           (dom/h1 nil "Combo Examples")
           (row (view data)))))
-    (atom {})
+    (atom {:username "Frodo"
+           :city {:value nil
+                  :options {"" ""
+                            "1" "New York"
+                            "2" "London"
+                            "3" "Tokyo"}}})
     {:target js/document.body}))
 
 (set! (.-onload js/window) main)
