@@ -1,5 +1,5 @@
 (task-options!
-  pom {:project 'combo
+  pom {:project 'ilshad/combo
        :version "0.1.0"})
 
 (set-env!
