@@ -3,33 +3,18 @@
   (:require [cljs.core.async :as async]
             [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
-            [combo.core :as combo]
-            [combo.widget :as widget]))
+            [combo.layout :as layout]
+            [combo.widget :as widget]
+            [combo.core :as combo]))
 
 (enable-console-print!)
 
-(defn widgets [data owner]
-  (reify
-
-    om/IInitState
-    (init-state [_]
-      {:fields-return-chan (async/chan)})
-
-    om/IWillMount
-    (will-mount [_]
-      (let [c (om/get-state owner :fields-return-chan)]
-        (go
-          (while true
-            (println "Message from widget:" (async/<! c))))))
-    
-    om/IRender
-    (render [_]
-      (om/build combo/widget data
-        {:init-state {:return-chan (om/get-state owner :fields-return-chan)}
-         :opts {:name :username
-                :render widget/input
-                :type "text"
-                :class "form-control"}}))))
+(defn view [data]
+  (om/build combo/view data
+    {:opts {:layout layout/basic-form
+            :widgets [{:name :username
+                       :render widget/input
+                       :type "text"}]}}))
 
 (defn- row [content]
   (dom/div #js {:className "row"}
@@ -43,7 +28,7 @@
       (om/component
         (dom/div #js {:className "container"}
           (dom/h1 nil "Combo Examples")
-          (row (om/build widgets data)))))
+          (row (view data)))))
     (atom {})
     {:target js/document.body}))
 

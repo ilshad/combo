@@ -13,7 +13,7 @@
     (async/put! (om/get-state owner :return-chan) [:focus? name yes?])
     (.preventDefault e)))
 
-(defn- key-code-result [topic name key-code owner]
+(defn- key-code-return [topic name key-code owner]
   (fn [e]
     (when (= (.-keyCode e) key-code)
       (async/put! (om/get-state owner :return-chan) [topic name key-code])
@@ -21,10 +21,13 @@
 
 (defn input [data owner opts]
   (let [name (:name opts)]
-    (dom/input #js {:type      (:type opts)
-                    :value     (:value data)
-                    :className (:class opts)
-                    :onChange  (on-change owner)
-                    :onFocus   (focus? true name owner)
-                    :onBlur    (focus? false name owner)
-                    :onKeyDown (key-code-result :key-down name 13 owner)})))
+    (dom/input
+      (clj->js
+        {:type        (:type opts)
+         :value       (:value data)
+         :className   (:class opts)
+         :placeholder (:placeholder opts)
+         :onChange    (on-change owner)
+         :onFocus     (focus? true name owner)
+         :onBlur      (focus? false name owner)
+         :onKeyDown   (key-code-return :key-down name 13 owner)}))))
