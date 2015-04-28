@@ -3,9 +3,9 @@
   (:require [cljs.core.async :as async]
             [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
-            [combo.layout :as layout]
-            [combo.widget :as widget]
-            [combo.core :refer [combo]]))
+            [combo.core :refer [combo]]
+            [combo.layouts :as layouts]
+            [combo.widgets :as widgets]))
 
 (enable-console-print!)
 
@@ -21,14 +21,14 @@
 
 (defn view [data]
   (om/build combo data
-    {:opts {:layout layout/basic-form
+    {:opts {:layout layouts/basic-form
             :behavior behavior
             :widgets [{:entity :username
-                       :render widget/input
+                       :render widgets/input
                        :type "text"
                        :handler validate}
                       {:entity :password
-                       :render widget/input
+                       :render widgets/input
                        :type "password"}]}}))
 
 (defn- row [content]

@@ -1,4 +1,4 @@
-(ns combo.layout
+(ns combo.layouts
   (:require [om.dom :as dom :include-macros true]))
 
 (defn dumb [widget opts]

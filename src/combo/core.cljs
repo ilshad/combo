@@ -3,7 +3,7 @@
   (:require [cljs.core.async :as async]
             [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
-            [combo.layout :as layout]))
+            [combo.layouts :as layouts]))
 
 (defn- widget [_ owner opts]
   (reify
@@ -21,15 +21,14 @@
         (go-loop []
           (alt!
             change-chan
-            ([value]
-             (if-let [value (handler value)]
-               (do (om/set-state! owner :value value)
-                   (async/>! return-chan [(:entity opts) :value value]))
+            ([v]
+             (if-let [v (handler v)]
+               (do (om/set-state! owner :value v)
+                   (async/>! return-chan [(:entity opts) :value v]))
                (om/refresh! owner)))
             update-chan
-            ([message]
-             (let [[entity attribute value] message]
-               (om/set-state! owner attribute value))))
+            ([[_ attr value]]
+             (om/set-state! owner attr value)))
           (recur))))
 
     om/IRender
@@ -48,18 +47,18 @@
 
     om/IWillMount
     (will-mount [_]
-      (let [behavior (:behavior opts (fn [_ state] [[] state]))
+      (let [behavior (:behavior opts (fn [_ s] [[] s]))
             return-chan (om/get-state owner :fields-return-chan)
             update-chan (om/get-state owner :fields-update-chan)]
         (go-loop [state {}]
-          (let [[messages state] (behavior (async/<! return-chan) state)]
-            (doseq [msg messages]
-              (async/>! update-chan msg))
-            (recur state)))))
-    
+          (let [[messages new-state] (behavior (async/<! return-chan) state)]
+            (doseq [m messages]
+              (async/>! update-chan m))
+            (recur new-state)))))
+
     om/IRenderState
     (render-state [_ state]
-      (let [layout (:layout opts layout/dumb)
+      (let [layout (:layout opts layouts/dumb)
             pub (om/get-state owner :fields-update-pub)]
         (layout
           (fn [widget-opts]
