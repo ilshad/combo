@@ -13,13 +13,21 @@
   (when (< (count s) 10)
     s))
 
+(defn manager [[entity attribute value :as message] state]
+  (println "Message:" message "state:" state)
+  [[] state])
+
 (defn view [data]
   (om/build combo data
     {:opts {:layout layout/basic-form
+            :manager manager
             :widgets [{:name :username
                        :render widget/input
                        :type "text"
-                       :handler validate}]}}))
+                       :handler validate}
+                      {:name :password
+                       :render widget/input
+                       :type "password"}]}}))
 
 (defn- row [content]
   (dom/div #js {:className "row"}
@@ -34,7 +42,7 @@
         (dom/div #js {:className "container"}
           (dom/h1 nil "Combo Examples")
           (row (view data)))))
-    (atom {:username {:value "Foo"}})
+    (atom {})
     {:target js/document.body}))
 
 (set! (.-onload js/window) main)
