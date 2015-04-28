@@ -8,26 +8,25 @@
     (async/put! (om/get-state owner :change-chan)
       (.. e -target -value))))
 
-(defn- focus? [yes? name owner]
+(defn- focus? [yes? entity owner]
   (fn [e]
-    (async/put! (om/get-state owner :return-chan) [name :focus? yes?])
+    (async/put! (om/get-state owner :return-chan) [entity :focus? yes?])
     (.preventDefault e)))
 
-(defn- key-code-return [name topic key-code owner]
+(defn- key-code-return [entity attr key-code owner]
   (fn [e]
     (when (= (.-keyCode e) key-code)
-      (async/put! (om/get-state owner :return-chan) [name topic key-code])
+      (async/put! (om/get-state owner :return-chan) [entity attr key-code])
       (.preventDefault e))))
 
 (defn input [owner opts]
-  (let [name (:name opts)]
-    (dom/input
-      (clj->js
-        {:type        (:type opts)
-         :value       (om/get-state owner :value)
-         :className   (:class opts)
-         :placeholder (:placeholder opts)
-         :onChange    (on-change owner)
-         :onFocus     (focus? true name owner)
-         :onBlur      (focus? false name owner)
-         :onKeyDown   (key-code-return name :key-down 13 owner)}))))
+  (dom/input
+    (clj->js
+      {:type        (:type opts)
+       :value       (om/get-state owner :value)
+       :className   (:class opts)
+       :placeholder (:placeholder opts)
+       :onChange    (on-change owner)
+       :onFocus     (focus? true (:entity opts) owner)
+       :onBlur      (focus? false (:entity opts) owner)
+       :onKeyDown   (key-code-return (:entity opts) :key-down 13 owner)})))

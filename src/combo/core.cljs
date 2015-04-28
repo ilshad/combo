@@ -24,12 +24,12 @@
             ([value]
              (if-let [value (handler value)]
                (do (om/set-state! owner :value value)
-                   (async/>! return-chan [(:name opts) :value value]))
+                   (async/>! return-chan [(:entity opts) :value value]))
                (om/refresh! owner)))
             update-chan
             ([message]
-             (let [[_ topic value] message]
-               (om/set-state! owner topic value))))
+             (let [[entity attribute value] message]
+               (om/set-state! owner attribute value))))
           (recur))))
 
     om/IRender
@@ -48,14 +48,14 @@
 
     om/IWillMount
     (will-mount [_]
-      (let [manager (:manager opts (fn [_ state] [[] state]))
+      (let [behavior (:behavior opts (fn [_ state] [[] state]))
             return-chan (om/get-state owner :fields-return-chan)
             update-chan (om/get-state owner :fields-update-chan)]
         (go-loop [state {}]
-          (let [[messages state] (manager (async/<! return-chan) state)]
+          (let [[messages state] (behavior (async/<! return-chan) state)]
             (doseq [msg messages]
-              (async/>! update-chan msg)))
-          (recur state))))
+              (async/>! update-chan msg))
+            (recur state)))))
     
     om/IRenderState
     (render-state [_ state]
@@ -64,9 +64,9 @@
         (layout
           (fn [widget-opts]
             (let [update-chan (async/chan)]
-              (async/sub pub (:name widget-opts) update-chan)
+              (async/sub pub (:entity widget-opts) update-chan)
               (om/build widget nil
-                {:init-state {:value (data (:name widget-opts))
+                {:init-state {:value (data (:entity widget-opts))
                               :return-chan (:fields-return-chan state)
                               :update-chan update-chan}
                  :opts widget-opts})))

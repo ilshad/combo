@@ -13,19 +13,21 @@
   (when (< (count s) 10)
     s))
 
-(defn manager [[entity attribute value :as message] state]
-  (println "Message:" message "state:" state)
-  [[] state])
+(defn behavior [[entity attr value] state]
+  (println entity attr value state)
+  (case attr
+    :value [[] (assoc state entity value)]
+    [[] state]))
 
 (defn view [data]
   (om/build combo data
     {:opts {:layout layout/basic-form
-            :manager manager
-            :widgets [{:name :username
+            :behavior behavior
+            :widgets [{:entity :username
                        :render widget/input
                        :type "text"
                        :handler validate}
-                      {:name :password
+                      {:entity :password
                        :render widget/input
                        :type "password"}]}}))
 
