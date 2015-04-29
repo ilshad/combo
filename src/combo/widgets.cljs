@@ -19,22 +19,44 @@
       (async/put! (om/get-state owner :return-chan) [entity attr key-code])
       (.preventDefault e))))
 
-(defn- attrs-basic [owner opts]
+(defn- event-keys [event]
+  (reduce
+    (fn [result [k v]]
+      (if v
+        (conj result k)
+        result))
+    #{}
+    {:alt   (.-altKey   event)
+     :ctrl  (.-ctrlKey  event)
+     :meta  (.-metaKey  event)
+     :shift (.-shiftKey event)}))
+
+(defn- attrs-basic [owner spec]
   {:value     (om/get-state owner :value)
-   :className (:class opts)
+   :className (:class spec)
    :onChange  (on-change owner)
-   :onFocus   (focus? true  (:entity opts) owner)
-   :onBlur    (focus? false (:entity opts) owner)})
+   :onFocus   (focus? true  (:entity spec) owner)
+   :onBlur    (focus? false (:entity spec) owner)})
 
-(defn- attrs-input [owner opts]
-  {:type        (:type opts)
-   :placeholder (:placeholder opts)})
+(defn- attrs-input [owner spec]
+  {:type        (:type spec)
+   :placeholder (:placeholder spec)})
 
-(defn input [owner opts]
-  (dom/input (clj->js (merge (attrs-basic owner opts)
-                             (attrs-input owner opts)))))
+(defn input [owner spec]
+  (dom/input (clj->js (merge (attrs-basic owner spec)
+                             (attrs-input owner spec)))))
 
-(defn select [owner opts]
-  (apply dom/select (clj->js (attrs-basic owner opts))
+(defn select [owner spec]
+  (apply dom/select (clj->js (attrs-basic owner spec))
     (for [[k v] (om/get-state owner :options)]
       (dom/option #js {:value k} v))))
+
+(def button ^{:combo/tag :button}
+  (fn [owner spec]
+    (dom/button
+      #js {:className (:class spec)
+           :onClick (fn [e]
+                      (async/put! (om/get-state owner :return-chan)
+                        [(:entity spec) :click (event-keys e)])
+                      (.preventDefault e))}
+      (or (om/get-state owner :value) (:value spec)))))

@@ -15,12 +15,12 @@
 
 (defn behavior [[entity attr value] state]
   (println entity attr value state)
-  (case attr
-    :value [[] (assoc state entity value)]
-    :focus? (if (and value (= entity :username))
-              [[[entity :value "->"]] state]
-              [[] state])
-    [[] state]))
+  (cond
+    (= attr :value)   [[] (assoc state entity value)]
+    (= entity :clear) [[[:username :value ""]
+                        [:password :value ""]
+                        [:city     :value ""]] state]
+    :else             [[] state]))
 
 (defn view [data]
   (om/build combo data
@@ -35,7 +35,10 @@
                        :type "password"}
                       {:entity :city
                        :render widgets/select
-                       :label "Select your city"}]}}))
+                       :label "Select your city"}
+                      {:entity :clear
+                       :render widgets/button
+                       :value "Clear"}]}}))
 
 (defn- row [content]
   (dom/div #js {:className "row"}
@@ -51,8 +54,7 @@
           (dom/h1 nil "Combo Examples")
           (row (view data)))))
     (atom {:username "Frodo"
-           :city {:value nil
-                  :options {"" ""
+           :city {:options {"" ""
                             "1" "New York"
                             "2" "London"
                             "3" "Tokyo"}}})

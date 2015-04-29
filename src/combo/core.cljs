@@ -5,7 +5,7 @@
             [om.dom :as dom :include-macros true]
             [combo.layouts :as layouts]))
 
-(defn- widget [_ owner opts]
+(defn- widget [_ owner spec]
   (reify
 
     om/IInitState
@@ -17,14 +17,14 @@
       (let [change-chan (om/get-state owner :change-chan)
             return-chan (om/get-state owner :return-chan)
             update-chan (om/get-state owner :update-chan)
-            interceptor (:interceptor opts identity)]
+            interceptor (:interceptor spec identity)]
         (go-loop []
           (alt!
             change-chan
             ([v]
              (if-let [v (interceptor v)]
                (do (om/set-state! owner :value v)
-                   (async/>! return-chan [(:entity opts) :value v]))
+                   (async/>! return-chan [(:entity spec) :value v]))
                (om/refresh! owner)))
             update-chan
             ([[_ attr value]]
@@ -33,7 +33,7 @@
 
     om/IRender
     (render [_]
-      ((:render opts) owner opts))))
+      ((:render spec) owner spec))))
 
 (defn- widget-init-state [data spec]
   (let [v (get data (:entity spec))]

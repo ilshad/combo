@@ -5,18 +5,13 @@
   (apply dom/div nil (map widget (:widgets opts))))
 
 (defn- basic-field-class [opts]
-  (case (-> opts :render meta :spec/tag)
+  (case (-> opts :render meta :combo/tag)
     :button "btn btn-primary btn-block"
     "form-control"))
 
-(defn- basic-field-opts [opts]
-  (merge
-    {:class (basic-field-class opts)}
-    opts))
-
 (defn basic-form [widget opts]
   (apply dom/form nil
-    (for [i (:widgets opts)]
+    (for [spec (:widgets opts)]
       (dom/div #js {:className "form-group"}
         (some->> (:label i) (dom/label nil))
-        (widget (basic-field-opts i))))))
+        (widget (assoc spec :class (basic-field-class spec)))))))
