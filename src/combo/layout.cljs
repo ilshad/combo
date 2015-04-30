@@ -8,22 +8,21 @@
   (widget
     (assoc spec :class
       (spec :class
-        (condp #(contains? %2 %1) (-> spec :render meta :tags)
+        (case (-> spec :render meta :combo.widget/type)
           :button "btn btn-default"
           :checkbox ""
           "form-control")))))
 
 (defn- bootstrap-form-group [widget-fn spec]
-  (let [widget (bootstrap-form-widget widget-fn spec)
-        group (fn [& args] (apply dom/div #js {:className "form-group"} args))]
-    (condp #(contains? %2 %1) (-> spec :render meta :tags)
+  (let [widget (bootstrap-form-widget widget-fn spec)]
+    (case (-> spec :render meta :combo.widget/type)
       
       :checkbox
-      (group
+      (dom/div #js {:className "form-group"}
         (dom/div #js {:className "checkbox"}
           (dom/label nil widget (:label spec))))
 
-      (group
+      (dom/div #js {:className "form-group"}
         (some->> (:label spec) (dom/label nil))
         widget))))
 

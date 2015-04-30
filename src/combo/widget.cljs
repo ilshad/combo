@@ -53,16 +53,17 @@
     (for [[k v] (om/get-state owner :options)]
       (dom/option #js {:value k} v))))
 
-(def checkbox ^{:tags #{:checkbox}}
+(def checkbox ^{::type :checkbox}
   (fn [owner spec]
     (dom/input
       #js {:type "checkbox"
            :className (:class spec)
            :checked (om/get-state owner :value)
-           :onChange #(async/put! (om/get-state owner :change-chan)
-                        (.. % -target -checked))})))
+           :onChange (fn [e]
+                       (async/put! (om/get-state owner :change-chan)
+                         (.. e -target -checked)))})))
 
-(def button ^{:tags #{:button}}
+(def button ^{::type :button}
   (fn [owner spec]
     (dom/button
       #js {:className (:class spec)

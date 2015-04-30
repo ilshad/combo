@@ -12,7 +12,7 @@
     s))
 
 (defn behavior [[entity attr value] state]
-  (println entity attr value state)
+  (println "BEHAVIOR" entity attr value state)
   (cond
     (= attr :value)   [[] (assoc state entity value)]
     (= entity :clear) [[[:user   :value ""]
@@ -40,8 +40,7 @@
                       {:entity :clear
                        :render combo/button
                        :value "Clear"
-                       ;:class "btn btn-primary btn-block"
-                       }]}}))
+                       :class "btn btn-primary btn-block"}]}}))
 
 (defn- row [content]
   (dom/div #js {:className "row"}
