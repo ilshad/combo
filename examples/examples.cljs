@@ -60,8 +60,9 @@
       content)))
 
 (def app-state
-  (atom {:agree? false
-         :city {:options {"" ""
+  (atom {:agree? true
+         :city {:value "2"
+                :options {"" ""
                           "1" "New York"
                           "2" "London"
                           "3" "Tokyo"}}}))

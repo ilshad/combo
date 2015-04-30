@@ -36,10 +36,12 @@
     (render [_]
       ((:render spec) owner spec))))
 
+(def ^:private ubiquitous-keys [:value :options :class])
+
 (defn- widget-init-state [data spec]
-  (let [props #(select-keys % [:value :options :class])]
+  (let [props #(select-keys % ubiquitous-keys)]
     (merge (props spec)
-           (let [v (data (:entity spec))]
+           (when-let [v (data (:entity spec))]
              (if (map? v) (props v) {:value v})))))
 
 (defn view [data owner opts]
