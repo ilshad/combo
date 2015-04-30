@@ -23,7 +23,7 @@
       [:note   :value ""]
       [:result :value (str "It was " (display-result state))]
       [:clear  :value "OK"]
-      [:clear  :class #{"btn" "btn-primary btn-block"}]] {}]
+      [:clear  :class "btn btn-primary btn-block"]] {}]
 
     (= entity :enable)
     [[[:note :disabled (not value)]] state]
@@ -32,7 +32,7 @@
     (let [new-state (assoc state entity value)]
       [[[:result :value (display-result new-state)]
         [:clear  :value "Clear"]
-        [:clear  :class #{"btn" "btn-warning" "btn-block"}]] new-state])
+        [:clear  :class "btn btn-warning btn-block"]] new-state])
 
     :else
     [[] state]))
@@ -57,7 +57,7 @@
                       {:entity :clear
                        :render combo/button
                        :value "LOL"
-                       :class #{"btn" "btn-primary" "btn-block"}}
+                       :class "btn btn-warning btn-block"}
                       {:entity :result
                        :render combo/div}]}}))
 

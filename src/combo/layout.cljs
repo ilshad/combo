@@ -13,10 +13,10 @@
   (assoc spec
     :class (spec :class
                (case (type-tag spec)
-                 :button   #{"btn" "btn-default"}
+                 :button   "btn btn-default"
                  :checkbox nil
                  :div      nil
-                 #{"form-control"}))
+                 "form-control"))
     :layout (fn [owner content]
               (case (type-tag spec)
                 

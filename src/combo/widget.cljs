@@ -3,10 +3,6 @@
             [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]))
 
-(defn- class-name [owner]
-  (when-let [v (om/get-state owner :class)]
-    (apply str (interpose " " v))))
-
 (defn- on-change [owner]
   (fn [e]
     (async/put! (om/get-state owner :change-chan)
@@ -36,7 +32,7 @@
      :shift (.-shiftKey event)}))
 
 (defn- attrs-basic [owner spec]
-  {:className (class-name owner)
+  {:className (om/get-state owner :class)
    :disabled  (om/get-state owner :disabled)})
 
 (defn- attrs-field [owner spec]
@@ -90,5 +86,5 @@
 
 (def div ^{::type :div}
   (fn [owner spec]
-    (dom/div #js {:className (class-name owner)}
+    (dom/div #js {:className (om/get-state owner :class)}
       (om/get-state owner :value))))
