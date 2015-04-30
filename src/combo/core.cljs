@@ -3,7 +3,22 @@
   (:require [cljs.core.async :as async]
             [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
-            [combo.layouts :as layouts]))
+            [combo.layout :as l]
+            [combo.widget :as w]))
+
+;; Layouts
+
+(def dumb-layout l/dumb-layout)
+(def bootstrap-form-layout l/bootstrap-form-layout)
+
+;; Widgets
+
+(def input w/input)
+(def select w/select)
+(def button w/button)
+(def textarea w/textarea)
+
+;; Core
 
 (defn- widget [_ owner spec]
   (reify
@@ -41,7 +56,7 @@
       (select-keys v [:value :options])
       {:value v})))
 
-(defn combo [data owner opts]
+(defn view [data owner opts]
   (reify
 
     om/IInitState
@@ -64,7 +79,7 @@
 
     om/IRenderState
     (render-state [_ state]
-      (let [layout (:layout opts layouts/dumb)]
+      (let [layout (:layout opts dumb-layout)]
         (layout
           (fn [spec]
             (let [update-chan (async/chan)]

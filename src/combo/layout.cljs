@@ -1,17 +1,17 @@
-(ns combo.layouts
+(ns combo.layout
   (:require [om.dom :as dom :include-macros true]))
 
-(defn dumb [widget opts]
+(defn dumb-layout [widget opts]
   (apply dom/div nil (map widget (:widgets opts))))
 
-(defn- basic-field-class [opts]
+(defn- bootstrap-form-widget-class [opts]
   (case (-> opts :render meta :combo/tag)
     :button "btn btn-primary btn-block"
     "form-control"))
 
-(defn basic-form [widget opts]
+(defn bootstrap-form-layout [widget opts]
   (apply dom/form nil
     (for [spec (:widgets opts)]
       (dom/div #js {:className "form-group"}
-        (some->> (:label i) (dom/label nil))
-        (widget (assoc spec :class (basic-field-class spec)))))))
+        (some->> (:label spec) (dom/label nil))
+        (widget (assoc spec :class (bootstrap-form-widget-class spec)))))))

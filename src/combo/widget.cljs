@@ -1,4 +1,4 @@
-(ns combo.widgets
+(ns combo.widget
   (:require [cljs.core.async :as async]
             [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]))
@@ -60,3 +60,6 @@
                         [(:entity spec) :click (event-keys e)])
                       (.preventDefault e))}
       (or (om/get-state owner :value) (:value spec)))))
+
+(defn textarea [owner spec]
+  (dom/textarea (clj->js (attrs-basic owner spec))))
