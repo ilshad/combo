@@ -25,7 +25,8 @@
     [[[:user   :value ""]
       [:city   :value ""]
       [:note   :value ""]
-      [:agree? :value false]] {}]
+      [:agree? :value false]
+      [:agree? :disabled false]] {}]
 
     :else
     [[] state]))
@@ -46,6 +47,7 @@
                        :render combo/textarea
                        :label "Note"}
                       {:entity :agree?
+                       :disabled true
                        :render combo/checkbox
                        :label "Agree?"}
                       {:entity :clear

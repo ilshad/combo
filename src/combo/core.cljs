@@ -36,7 +36,7 @@
     (render [_]
       ((:render spec) owner spec))))
 
-(def ^:private ubiquitous-keys [:value :options :class])
+(def ^:private ubiquitous-keys [:value :options :class :disabled])
 
 (defn- widget-init-state [data spec]
   (let [props #(select-keys % ubiquitous-keys)]
