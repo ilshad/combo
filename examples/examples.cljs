@@ -1,32 +1,38 @@
 (ns examples
-  (:require-macros [cljs.core.async.macros :refer [go]])
-  (:require [cljs.core.async :as async]
-            [om.core :as om :include-macros true]
+  (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
             [combo.api :as combo]))
 
 (enable-console-print!)
 
-(defn- validate [s]
+(defn- validate-user [s]
   (when (< (count s) 20)
     s))
 
-(defn- display-result [m]
-  (apply str (interpose ", " (vals m))))
+(defn- display-result [state]
+  (apply str
+    (interpose ", "
+      (vals (select-keys state [:user :city :note])))))
 
 (defn behavior [[entity attr value] state]
   (cond
-
-    (= attr :value)
-    (let [new-state (assoc state entity value)]
-      [[[:result :value (display-result new-state)]] new-state])
-
+    
     (= entity :clear)
     [[[:user   :value ""]
       [:city   :value ""]
       [:note   :value ""]
-      [:agree? :value false]
-      [:agree? :disabled false]] {}]
+      [:result :value (str "It was " (display-result state))]
+      [:clear  :value "OK"]
+      [:clear  :class #{"btn" "btn-primary btn-block"}]] {}]
+
+    (= entity :enable)
+    [[[:note :disabled (not value)]] state]
+    
+    (= attr :value)
+    (let [new-state (assoc state entity value)]
+      [[[:result :value (display-result new-state)]
+        [:clear  :value "Clear"]
+        [:clear  :class #{"btn" "btn-warning" "btn-block"}]] new-state])
 
     :else
     [[] state]))
@@ -35,47 +41,43 @@
   (om/build combo/view data
     {:opts {:behavior behavior
             :layout combo/bootstrap-form-layout
-            :widgets [{:entity :result
-                       :render combo/div}
-                      {:entity :user
+            :widgets [{:entity :user
                        :render combo/input
                        :type "text"
-                       :interceptor validate}
+                       :interceptor validate-user}
                       {:entity :city
                        :render combo/select}
+                      {:entity :enable
+                       :render combo/checkbox
+                       :label "Enable note field"}
                       {:entity :note
+                       :disabled true
                        :render combo/textarea
                        :label "Note"}
-                      {:entity :agree?
-                       :disabled true
-                       :render combo/checkbox
-                       :label "Agree?"}
                       {:entity :clear
                        :render combo/button
-                       :value "Clear"
-                       :class #{"btn" "btn-primary" "btn-block"}}]}}))
-
-(defn- row [content]
-  (dom/div #js {:className "row"}
-    (dom/hr nil)
-    (dom/div #js {:className "col-xs-6 col-xs-push-3"}
-      content)))
+                       :value "LOL"
+                       :class #{"btn" "btn-primary" "btn-block"}}
+                      {:entity :result
+                       :render combo/div}]}}))
 
 (def app-state
   (atom {:agree? true
-         :city {:value "2"
+         :city {:value "London"
                 :options {"" ""
-                          "1" "New York"
-                          "2" "London"
-                          "3" "Tokyo"}}}))
+                          "New York" "New York"
+                          "London" "London"
+                          "Tolyo" "Tokyo"}}}))
 
 (defn main []
   (om/root
     (fn [data _]
       (om/component
         (dom/div #js {:className "container"}
-          (dom/h1 nil "Combo Examples")
-          (row (view data)))))
+          (dom/div #js {:className "row"}
+            (dom/div #js {:className "col-xs-6 col-xs-push-3"}
+              (dom/br nil)
+              (view data))))))
     app-state
     {:target js/document.body}))
 

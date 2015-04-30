@@ -34,7 +34,8 @@
 
     om/IRender
     (render [_]
-      ((:render spec) owner spec))))
+      (let [layout (:layout spec (fn [_ x] x))]
+        (layout owner ((:render spec) owner spec))))))
 
 (def ^:private ubiquitous-keys [:value :options :class :disabled])
 

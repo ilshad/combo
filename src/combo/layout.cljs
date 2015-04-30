@@ -2,32 +2,34 @@
   (:require [om.dom :as dom :include-macros true]))
 
 (defn dumb-layout [widget opts]
-  (apply dom/div nil (map widget (:widgets opts))))
+  (apply dom/div nil
+    (map widget
+      (:widgets opts))))
 
-(defn- bootstrap-form-widget [widget spec]
-  (widget
-    (assoc spec :class
-      (spec :class
-        (case (-> spec :render meta :combo.widget/type)
-          :button #{"btn" "btn-default"}
-          :checkbox nil
-          :div nil
-          #{"form-control"})))))
+(defn- type-tag [spec]
+  (-> spec :render meta :combo.widget/type))
 
-(defn- bootstrap-form-group [widget-fn spec]
-  (let [widget (bootstrap-form-widget widget-fn spec)]
-    (case (-> spec :render meta :combo.widget/type)
-      
-      :checkbox
-      (dom/div #js {:className "form-group"}
-        (dom/div #js {:className "checkbox"}
-          (dom/label nil widget (:label spec))))
-
-      (dom/div #js {:className "form-group"}
-        (some->> (:label spec) (dom/label nil))
-        widget))))
+(defn- bootstrap-form-spec [spec]
+  (assoc spec
+    :class (spec :class
+               (case (type-tag spec)
+                 :button   #{"btn" "btn-default"}
+                 :checkbox nil
+                 :div      nil
+                 #{"form-control"}))
+    :layout (fn [owner content]
+              (case (type-tag spec)
+                
+                :checkbox
+                (dom/div #js {:className "form-group"}
+                  (dom/div #js {:className "checkbox"}
+                    (dom/label nil content (:label spec))))
+                
+                (dom/div #js {:className "form-group"}
+                  (some->> (:label spec) (dom/label nil))
+                  content)))))
 
 (defn bootstrap-form-layout [widget opts]
   (apply dom/form nil
-    (map (partial bootstrap-form-group widget)
+    (map (comp widget bootstrap-form-spec)
       (:widgets opts))))
