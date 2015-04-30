@@ -7,7 +7,7 @@
 
 (defn- widget [_ owner spec]
   (reify
-
+    
     om/IInitState
     (init-state [_]
       {:change-chan (async/chan)})
@@ -37,10 +37,10 @@
       ((:render spec) owner spec))))
 
 (defn- widget-init-state [data spec]
-  (let [v (get data (:entity spec))]
-    (if (map? v)
-      (select-keys v [:value :options])
-      {:value v})))
+  (let [props #(select-keys % [:value :options :class])]
+    (merge (props spec)
+           (let [v (data (:entity spec))]
+             (if (map? v) (props v) {:value v})))))
 
 (defn view [data owner opts]
   (reify

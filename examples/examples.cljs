@@ -51,7 +51,7 @@
                       {:entity :clear
                        :render combo/button
                        :value "Clear"
-                       :class "btn btn-primary btn-block"}]}}))
+                       :class #{"btn" "btn-primary" "btn-block"}}]}}))
 
 (defn- row [content]
   (dom/div #js {:className "row"}

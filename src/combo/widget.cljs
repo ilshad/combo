@@ -3,6 +3,10 @@
             [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]))
 
+(defn class-name [owner]
+  (when-let [v (om/get-state owner :class)]
+    (apply str (interpose " " v))))
+
 (defn- on-change [owner]
   (fn [e]
     (async/put! (om/get-state owner :change-chan)
@@ -33,7 +37,7 @@
 
 (defn- attrs-basic [owner spec]
   {:value     (om/get-state owner :value)
-   :className (:class spec)
+   :className (class-name owner)
    :onChange  (on-change owner)
    :onFocus   (focus? owner (:entity spec) true)
    :onBlur    (focus? owner (:entity spec) false)})
@@ -57,7 +61,7 @@
   (fn [owner spec]
     (dom/input
       #js {:type "checkbox"
-           :className (:class spec)
+           :className (class-name owner)
            :checked (om/get-state owner :value)
            :onChange (fn [e]
                        (async/put! (om/get-state owner :change-chan)
@@ -66,7 +70,7 @@
 (def button ^{::type :button}
   (fn [owner spec]
     (dom/button
-      #js {:className (:class spec)
+      #js {:className (class-name owner)
            :onClick (fn [e]
                       (async/put! (om/get-state owner :return-chan)
                         [(:entity spec) :click (event-keys e)])
@@ -75,5 +79,5 @@
 
 (def div ^{::type :div}
   (fn [owner spec]
-    (dom/div #js {:className (:class spec)}
+    (dom/div #js {:className (class-name owner)}
       (om/get-state owner :value))))

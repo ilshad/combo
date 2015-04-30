@@ -9,10 +9,10 @@
     (assoc spec :class
       (spec :class
         (case (-> spec :render meta :combo.widget/type)
-          :button "btn btn-default"
-          :checkbox ""
-          :div ""
-          "form-control")))))
+          :button #{"btn" "btn-default"}
+          :checkbox nil
+          :div nil
+          #{"form-control"})))))
 
 (defn- bootstrap-form-group [widget-fn spec]
   (let [widget (bootstrap-form-widget widget-fn spec)]
