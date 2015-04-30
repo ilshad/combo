@@ -15,9 +15,10 @@
   (println entity attr value state)
   (cond
     (= attr :value)   [[] (assoc state entity value)]
-    (= entity :clear) [[[:user :value ""]
-                        [:city :value ""]
-                        [:note :value ""]] state]
+    (= entity :clear) [[[:user   :value ""]
+                        [:city   :value ""]
+                        [:note   :value ""]
+                        [:agree? :value false]] {}]
     :else             [[] state]))
 
 (defn view [data]
@@ -33,9 +34,14 @@
                       {:entity :note
                        :render combo/textarea
                        :label "Note"}
+                      {:entity :agree?
+                       :render combo/checkbox
+                       :label "Agree?"}
                       {:entity :clear
                        :render combo/button
-                       :value "Clear"}]}}))
+                       :value "Clear"
+                       ;:class "btn btn-primary btn-block"
+                       }]}}))
 
 (defn- row [content]
   (dom/div #js {:className "row"}
@@ -45,6 +51,7 @@
 
 (def app-state
   (atom {:user "Frodo"
+         ;:agree? false
          :city {:options {"" ""
                           "1" "New York"
                           "2" "London"

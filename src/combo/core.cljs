@@ -10,6 +10,7 @@
 (def bootstrap-form-layout   layout/bootstrap-form-layout)
 
 (def input                   widget/input)
-(def select                  widget/select)
-(def button                  widget/button)
 (def textarea                widget/textarea)
+(def select                  widget/select)
+(def checkbox                widget/checkbox)
+(def button                  widget/button)
