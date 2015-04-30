@@ -72,3 +72,8 @@
                         [(:entity spec) :click (event-keys e)])
                       (.preventDefault e))}
       (or (om/get-state owner :value) (:value spec)))))
+
+(def div ^{::type :div}
+  (fn [owner spec]
+    (dom/div #js {:className (:class spec)}
+      (om/get-state owner :value))))

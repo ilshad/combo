@@ -11,21 +11,32 @@
   (when (< (count s) 20)
     s))
 
+(defn- display-result [m]
+  (apply str (interpose ", " (vals m))))
+
 (defn behavior [[entity attr value] state]
-  (println "BEHAVIOR" entity attr value state)
   (cond
-    (= attr :value)   [[] (assoc state entity value)]
-    (= entity :clear) [[[:user   :value ""]
-                        [:city   :value ""]
-                        [:note   :value ""]
-                        [:agree? :value false]] {}]
-    :else             [[] state]))
+
+    (= attr :value)
+    (let [new-state (assoc state entity value)]
+      [[[:result :value (display-result new-state)]] new-state])
+
+    (= entity :clear)
+    [[[:user   :value ""]
+      [:city   :value ""]
+      [:note   :value ""]
+      [:agree? :value false]] {}]
+
+    :else
+    [[] state]))
 
 (defn view [data]
   (om/build combo/view data
     {:opts {:behavior behavior
             :layout combo/bootstrap-form-layout
-            :widgets [{:entity :user
+            :widgets [{:entity :result
+                       :render combo/div}
+                      {:entity :user
                        :render combo/input
                        :type "text"
                        :interceptor validate}
@@ -49,8 +60,7 @@
       content)))
 
 (def app-state
-  (atom {:user "Frodo"
-         ;:agree? false
+  (atom {:agree? false
          :city {:options {"" ""
                           "1" "New York"
                           "2" "London"

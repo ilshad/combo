@@ -11,6 +11,7 @@
         (case (-> spec :render meta :combo.widget/type)
           :button "btn btn-default"
           :checkbox ""
+          :div ""
           "form-control")))))
 
 (defn- bootstrap-form-group [widget-fn spec]
