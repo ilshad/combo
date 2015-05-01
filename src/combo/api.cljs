@@ -1,7 +1,7 @@
 (ns combo.api
-  (:require [combo.core   :as core]
-            [combo.layout :as layout]
-            [combo.widget :as widget]))
+  (:require [combo.core       :as core]
+            [combo.lib.layout :as layout]
+            [combo.lib.widget :as widget]))
 
 (def view                    core/view)
 

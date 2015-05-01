@@ -3,7 +3,7 @@
   (:require [cljs.core.async :as async]
             [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
-            [combo.layout :refer [dumb-layout]]))
+            [combo.lib.layout :refer [dumb-layout]]))
 
 (defn- widget [_ owner spec]
   (reify
@@ -41,9 +41,12 @@
 
 (defn- widget-init-state [data spec]
   (let [props #(select-keys % ubiquitous-keys)]
-    (merge (props spec)
-           (when-let [v (data (:entity spec))]
-             (if (map? v) (props v) {:value v})))))
+    (merge
+      (props spec)
+      (when-let [v (data (:entity spec))]
+        (if (map? v)
+          (props v)
+          {:value v})))))
 
 (defn view [data owner opts]
   (reify

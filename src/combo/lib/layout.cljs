@@ -1,4 +1,4 @@
-(ns combo.layout
+(ns combo.lib.layout
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]))
 
@@ -8,7 +8,7 @@
       (:widgets opts))))
 
 (defn- type-tag [spec]
-  (-> spec :render meta :combo.widget/type))
+  (-> spec :render meta :combo.lib.widget/type))
 
 (defn- form-group [owner cls & content]
   (apply dom/div
