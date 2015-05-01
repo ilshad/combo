@@ -23,16 +23,22 @@
       [:note   :value ""]
       [:result :value (str "It was " (display-result state))]
       [:clear  :value "OK"]
-      [:clear  :class "btn btn-primary btn-block"]] {}]
+      [:clear  :class "btn btn-primary btn-block"]
+      [:user   :group-class ""]] {}]
 
     (= entity :enable)
     [[[:note :disabled (not value)]] state]
     
     (= attr :value)
-    (let [new-state (assoc state entity value)]
-      [[[:result :value (display-result new-state)]
-        [:clear  :value "Clear"]
-        [:clear  :class "btn btn-warning btn-block"]] new-state])
+    (let [new-state (assoc state entity value)
+          messages [[:result :value (display-result new-state)]
+                    [:clear  :value "Clear"]
+                    [:clear  :class "btn btn-warning btn-block"]
+                    [:user   :group-class (case entity
+                                            :city "has-error"
+                                            :note "has-warning"
+                                            :user "has-success")]]]
+      [messages new-state])
 
     :else
     [[] state]))
@@ -57,14 +63,13 @@
                       {:entity :clear
                        :render combo/button
                        :value "LOL"
-                       :class "btn btn-warning btn-block"}
+                       :class "btn btn-primary btn-block"}
                       {:entity :result
                        :render combo/div}]}}))
 
 (def app-state
   (atom {:agree? true
-         :city {:value "London"
-                :options {"" ""
+         :city {:options {"" ""
                           "New York" "New York"
                           "London" "London"
                           "Tolyo" "Tokyo"}}}))
