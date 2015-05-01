@@ -1,6 +1,7 @@
 (ns combo.dev
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
+            [cljs.core.match :refer-macros [match]]
             [combo.api :as combo]))
 
 (enable-console-print!)
@@ -14,10 +15,10 @@
     (interpose ", "
       (vals (select-keys state [:user :city :note])))))
 
-(defn behavior [[entity attr value] state]
-  (cond
-    
-    (= entity :clear)
+(defn behavior [message state]
+  (match message
+
+    [:clear _ _]
     [[[:user   :value ""]
       [:city   :value ""]
       [:note   :value ""]
@@ -26,10 +27,10 @@
       [:clear  :class "btn btn-primary btn-block"]
       [:user   :group-class ""]] {}]
 
-    (= entity :enable)
+    [:enable _ value]
     [[[:note :disabled (not value)]] state]
-    
-    (= attr :value)
+
+    [entity :value value]
     (let [new-state (assoc state entity value)
           messages [[:result :value (display-result new-state)]
                     [:clear  :value "Clear"]
@@ -40,8 +41,7 @@
                                             :user "has-success")]]]
       [messages new-state])
 
-    :else
-    [[] state]))
+    :else [[] state]))
 
 (defn view [data]
   (om/build combo/view data

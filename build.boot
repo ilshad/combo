@@ -14,7 +14,7 @@
                   [org.clojure/clojurescript "0.0-3196"]
                   [org.clojure/core.async    "0.1.346.0-17112a-alpha"]
                   [org.omcljs/om             "0.8.8"]
-
+                  
                   [adzerk/boot-cljs          "0.0-2814-4"]
                   [adzerk/boot-reload        "0.2.6"]
                   [adzerk/boot-cljs-repl     "0.1.9"]
@@ -25,9 +25,14 @@
          '[adzerk.boot-cljs-repl :refer [cljs-repl start-repl]]
          '[pandeiro.boot-http    :refer [serve]])
 
+(defn dev-env! []
+  (merge-env!
+    :source-paths #{"dev"}
+    :resource-paths #{"dev"}
+    :dependencies '[[org.clojure/core.match "0.3.0-alpha4"]]))
+
 (deftask dev []
-  (merge-env! :source-paths #{"dev"})
-  (set-env! :resource-paths #{"dev"})
+  (dev-env!)
   (comp (serve :dir "target")
         (watch)
         (reload :on-jsload 'combo.dev/main)
@@ -35,3 +40,9 @@
         (cljs :optimizations :none
               :source-map    true
               :unified-mode  true)))
+
+(deftask staging []
+  (dev-env!)
+  (comp (serve :dir "target")
+        (cljs :optimizations :advanced)
+        (wait)))
