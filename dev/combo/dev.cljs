@@ -1,4 +1,4 @@
-(ns examples
+(ns combo.dev
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
             [combo.api :as combo]))
