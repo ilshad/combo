@@ -48,6 +48,23 @@
           (props v)
           {:value v})))))
 
+(defn- default-commit [data owner]
+  (let [intern-chan (om/get-state owner :intern-chan)
+        commit-chan (om/get-state owner :commit-chan)]
+    (go-loop []
+      (let [[_ attr value :as msg] (async/<! intern-chan)]
+        (om/update! data attr value)
+        (when commit-chan
+          (async/put! commit-chan msg)))
+      (recur))))
+
+(defn- setup-commit [data owner opts]
+  (let [commit (:commit opts default-commit)
+        intern-chan (om/get-state owner :intern-chan)
+        update-pub (om/get-state owner :update-pub)]
+    (async/sub update-pub :combo/commit intern-chan)
+    (commit data owner)))
+
 (defn view [data owner opts]
   (reify
 
@@ -56,13 +73,15 @@
       (let [update-chan (async/chan)]
         {:update-chan update-chan
          :update-pub  (async/pub update-chan first)
-         :return-chan (async/chan)}))
+         :return-chan (async/chan)
+         :intern-chan (async/chan)}))
 
     om/IWillMount
     (will-mount [_]
       (let [behavior (:behavior opts (fn [_ s] [[] s]))
             return-chan (om/get-state owner :return-chan)
             update-chan (om/get-state owner :update-chan)]
+        (setup-commit data owner opts)
         (go-loop [state {}]
           (let [[messages new-state] (behavior (async/<! return-chan) state)]
             (doseq [m messages]
