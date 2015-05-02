@@ -10,14 +10,17 @@
     
     om/IInitState
     (init-state [_]
-      {:change-chan (async/chan)})
+      {:change-chan (async/chan)
+       :update-chan (async/chan)})
 
     om/IWillMount
     (will-mount [_]
-      (let [change-chan (om/get-state owner :change-chan)
+      (let [interceptor (:interceptor spec identity)
+            change-chan (om/get-state owner :change-chan)
             return-chan (om/get-state owner :return-chan)
             update-chan (om/get-state owner :update-chan)
-            interceptor (:interceptor spec identity)]
+            update-pubc (om/get-state owner :update-pubc)]
+        (async/sub update-pubc (:entity spec) update-chan)
         (go-loop []
           (alt!
             change-chan
@@ -49,20 +52,20 @@
           {:value v})))))
 
 (defn- default-commit [data owner]
-  (let [intern-chan (om/get-state owner :intern-chan)
-        commit-chan (om/get-state owner :commit-chan)]
+  (let [in (om/get-state owner :intern-chan)
+        out (om/get-state owner :commit-chan)]
     (go-loop []
-      (let [[_ attr value :as msg] (async/<! intern-chan)]
-        (om/update! data attr value)
-        (when commit-chan
-          (async/put! commit-chan msg)))
+      (let [[_ a v :as msg] (async/<! in)]
+        (om/update! data a v)
+        (when out
+          (async/>! out msg)))
       (recur))))
 
 (defn- setup-commit [data owner opts]
   (let [commit (:commit opts default-commit)
-        intern-chan (om/get-state owner :intern-chan)
-        update-pub (om/get-state owner :update-pub)]
-    (async/sub update-pub :combo/commit intern-chan)
+        pubc (om/get-state owner :update-pubc)
+        chan (om/get-state owner :intern-chan)]
+    (async/sub pubc :combo/commit chan)
     (commit data owner)))
 
 (defn view [data owner opts]
@@ -72,7 +75,7 @@
     (init-state [_]
       (let [update-chan (async/chan)]
         {:update-chan update-chan
-         :update-pub  (async/pub update-chan first)
+         :update-pubc (async/pub update-chan first)
          :return-chan (async/chan)
          :intern-chan (async/chan)}))
 
@@ -93,11 +96,9 @@
       (let [layout (:layout opts dumb-layout)]
         (layout
           (fn [spec]
-            (let [update-chan (async/chan)]
-              (async/sub (:update-pub state) (:entity spec) update-chan)
-              (om/build widget nil
-                {:init-state (-> (widget-init-state data spec)
-                                 (assoc :return-chan (:return-chan state)
-                                        :update-chan update-chan))
-                 :opts spec})))
+            (om/build widget nil
+              {:init-state (-> (widget-init-state data spec)
+                               (assoc :update-pubc (:update-pubc state)
+                                      :return-chan (:return-chan state)))
+               :opts spec}))
           opts)))))

@@ -20,23 +20,12 @@
 (defn behavior [message state]
   (match message
 
-    [:clear _ _]
-    [[[:user   :value ""]
-      [:city   :value ""]
-      [:note   :value ""]
-      [:result :value (str "It was " (display-result state))]
-      [:clear  :value "OK"]
-      [:clear  :class "btn btn-primary btn-block"]
-      [:user   :group-class ""]] {}]
-
     [:enable _ value]
     [[[:note :disabled (not value)]] state]
 
     [entity :value value]
     (let [new-state (assoc state entity value)
           messages [[:result :value (display-result new-state)]
-                    [:clear  :value "Clear"]
-                    [:clear  :class "btn btn-warning btn-block"]
                     [:user   :group-class (case entity
                                             :city "has-error"
                                             :note "has-warning"
@@ -66,10 +55,6 @@
                        :disabled true
                        :render combo/textarea
                        :label "Note"}
-                      {:entity :clear
-                       :render combo/button
-                       :value "LOL"
-                       :class "btn btn-primary btn-block"}
                       {:entity :save
                        :render combo/button
                        :value "Save"
@@ -94,7 +79,6 @@
     
     om/IRender
     (render [_]
-      (println "DATA" data)
       (dom/div #js {:className "container"}
         (dom/div #js {:className "row"}
           (dom/div #js {:className "col-xs-6 col-xs-push-3"}
