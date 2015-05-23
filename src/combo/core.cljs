@@ -46,7 +46,7 @@
   (let [props #(select-keys % ubiquitous-keys)]
     (merge
       (props spec)
-      (when-let [v (data (:entity spec))]
+      (when-let [v (get data (:entity spec))]
         (if (map? v)
           (props v)
           {:value v})))))
@@ -56,9 +56,8 @@
         out (om/get-state owner :commit-chan)]
     (go-loop []
       (let [[_ a v :as msg] (async/<! in)]
-        (om/update! data a v)
-        (when out
-          (async/>! out msg)))
+        (when data (om/update! data a v))
+        (when out (async/>! out msg)))
       (recur))))
 
 (defn- setup-commit [data owner opts]
@@ -66,7 +65,7 @@
         pubc (om/get-state owner :update-pubc)
         chan (om/get-state owner :intern-chan)]
     (async/sub pubc :combo/commit chan)
-    (commit data owner)))
+    (when data (commit data owner))))
 
 (defn view [data owner opts]
   (reify
