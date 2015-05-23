@@ -3,23 +3,23 @@
             [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]))
 
-(defn- on-change [owner]
+(defn on-change [owner]
   (fn [e]
     (async/put! (om/get-state owner :change-chan)
       (.. e -target -value))))
 
-(defn- focus? [owner entity yes?]
+(defn focus? [owner entity yes?]
   (fn [e]
     (async/put! (om/get-state owner :return-chan) [entity :focus? yes?])
     (.preventDefault e)))
 
-(defn- key-code-return [owner entity attr key-code]
+(defn key-code-return [owner entity attr key-code]
   (fn [e]
     (when (= (.-keyCode e) key-code)
       (async/put! (om/get-state owner :return-chan) [entity attr key-code])
       (.preventDefault e))))
 
-(defn- event-keys [event]
+(defn event-keys [event]
   (reduce
     (fn [result [k v]]
       (if v
@@ -31,28 +31,29 @@
      :meta  (.-metaKey  event)
      :shift (.-shiftKey event)}))
 
-(defn- attrs-basic [owner spec]
+(defn attrs-basic [owner spec]
   {:className (om/get-state owner :class)
    :disabled  (om/get-state owner :disabled)})
 
-(defn- attrs-field [owner spec]
+(defn attrs-field [owner spec]
   {:value     (om/get-state owner :value)
+   :name      (:name spec)
    :onChange  (on-change owner)
    :onFocus   (focus? owner (:entity spec) true)
    :onBlur    (focus? owner (:entity spec) false)})
 
-(defn- attrs-input [owner spec]
+(defn attrs-input [owner spec]
   {:type        (:type spec)
    :placeholder (:placeholder spec)})
 
-(defn- attrs-checkbox [owner spec]
+(defn attrs-checkbox [owner spec]
   {:type "checkbox"
    :checked (om/get-state owner :value)
    :onChange (fn [e]
                (async/put! (om/get-state owner :change-chan)
                  (.. e -target -checked)))})
 
-(defn- attrs-button [owner spec]
+(defn attrs-click [owner spec]
   {:onClick (fn [e]
               (async/put! (om/get-state owner :return-chan)
                 [(:entity spec) :click (event-keys e)])
@@ -73,18 +74,21 @@
     (for [[k v] (om/get-state owner :options)]
       (dom/option #js {:value k} v))))
 
-(def checkbox ^{::type :checkbox}
-  (fn [owner spec]
-    (dom/input (clj->js (merge (attrs-basic owner spec)
-                               (attrs-checkbox owner spec))))))
+(defn checkbox [owner spec]
+  (dom/input (clj->js (merge (attrs-basic owner spec)
+                             (attrs-checkbox owner spec)))))
 
-(def button ^{::type :button}
-  (fn [owner spec]
-    (dom/button (clj->js (merge (attrs-basic owner spec)
-                                (attrs-button owner spec)))
-      (om/get-state owner :value))))
+(defn button [owner spec]
+  (dom/button (clj->js (merge (attrs-basic owner spec)
+                              (attrs-click owner spec)))
+    (om/get-state owner :value)))
 
-(def div ^{::type :div}
-  (fn [owner spec]
-    (dom/div #js {:className (om/get-state owner :class)}
-      (om/get-state owner :value))))
+(defn div [owner spec]
+  (dom/div #js {:className (om/get-state owner :class)}
+    (om/get-state owner :value)))
+
+(defn a [owner spec]
+  (dom/a (clj->js (assoc (merge (attrs-basic owner spec)
+                                (attrs-click owner spec))
+                    :href (:href spec)))
+    (om/get-state owner :value)))

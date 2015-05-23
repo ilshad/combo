@@ -14,3 +14,4 @@
 (def checkbox                widget/checkbox)
 (def button                  widget/button)
 (def div                     widget/div)
+(def a                       widget/a)
