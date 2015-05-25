@@ -26,10 +26,10 @@
     [entity :value value]
     (let [new-state (assoc state entity value)
           messages [[:result :value (display-result new-state)]
-                    [:user   :group-class (case entity
-                                            :city "has-error"
-                                            :note "has-warning"
-                                            :user "has-success")]]]
+                    [:user :class (case entity
+                                    :city "has-error"
+                                    :note "has-warning"
+                                    :user "has-success")]]]
       [messages new-state])
 
     [:clear _ _]
