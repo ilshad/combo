@@ -3,7 +3,7 @@
   (:require [cljs.core.async :as async]
             [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
-            [combo.lib.layout :refer [dumb-layout]]))
+            [combo.lib.layout.dumb :refer [dumb-layout]]))
 
 (defn- widget [_ owner spec]
   (reify

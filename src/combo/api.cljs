@@ -1,12 +1,13 @@
 (ns combo.api
-  (:require [combo.core       :as core]
-            [combo.lib.layout :as layout]
-            [combo.lib.widget :as widget]))
+  (:require [combo.core                 :as core]
+            [combo.lib.layout.dumb      :as dumb]
+            [combo.lib.layout.bootstrap :as bootstrap]
+            [combo.lib.widget.render    :as widget]))
 
 (def view                    core/view)
 
-(def dumb-layout             layout/dumb-layout)
-(def bootstrap-layout        layout/bootstrap-layout)
+(def dumb-layout             dumb/dumb-layout)
+(def bootstrap-layout        bootstrap/bootstrap-layout)
 
 (def input                   widget/input)
 (def textarea                widget/textarea)

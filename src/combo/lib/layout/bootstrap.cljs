@@ -1,10 +1,7 @@
-(ns combo.lib.layout
+(ns combo.lib.layout.bootstrap
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
-            [combo.lib.widget :as w]))
-
-(defn dumb-layout [widget opts]
-  (apply dom/div nil (map widget (:widgets opts))))
+            [combo.lib.widget.render :as widget]))
 
 (defn- div [class-name contents]
   (apply dom/div #js {:className class-name} contents))
@@ -16,10 +13,10 @@
 (defn- widget-class [spec]
   (spec :class
     (condp = (:render spec)
-      w/button "btn btn-default"
-      w/checkbox nil
-      w/div nil
-      w/a nil
+      widget/button "btn btn-default"
+      widget/checkbox nil
+      widget/div nil
+      widget/a nil
       "form-control")))
 
 (defn- widget-layout [spec]
@@ -27,7 +24,7 @@
     (fn [owner content]
       (condp = (:render spec)
         
-        w/checkbox
+        widget/checkbox
         (form-group spec owner nil
           (dom/div #js {:className "checkbox"}
             (dom/label nil content
