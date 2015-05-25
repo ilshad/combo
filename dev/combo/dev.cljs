@@ -46,6 +46,10 @@
                        :render combo/input
                        :type "text"
                        :interceptor validate-user}
+                      {:entity :reset
+                       :render combo/a
+                       :href ""
+                       :value "OK"}
                       {:entity :city
                        :render combo/select}
                       {:entity :enable
