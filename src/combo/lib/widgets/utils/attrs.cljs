@@ -1,7 +1,7 @@
-(ns combo.lib.widget.attrs
+(ns combo.lib.widgets.utils.attrs
   (:require [cljs.core.async :as async]
             [om.core :as om :include-macros true]
-            [combo.lib.widget.event :as event]))
+            [combo.lib.widgets.utils.event :as event]))
 
 (defn basic [owner spec]
   {:className (om/get-state owner :class)

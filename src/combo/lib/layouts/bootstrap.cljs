@@ -1,7 +1,7 @@
-(ns combo.lib.layout.bootstrap
+(ns combo.lib.layouts.bootstrap
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
-            [combo.lib.widget.render :as widget]))
+            [combo.lib.widgets.render :as widget]))
 
 (defn- div [class-name contents]
   (apply dom/div #js {:className class-name} contents))

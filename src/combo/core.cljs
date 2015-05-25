@@ -2,8 +2,7 @@
   (:require-macros [cljs.core.async.macros :refer [go-loop alt!]])
   (:require [cljs.core.async :as async]
             [om.core :as om :include-macros true]
-            [om.dom :as dom :include-macros true]
-            [combo.lib.layout.dumb :refer [dumb-layout]]))
+            [combo.lib.layouts.simple :refer [simple-layout]]))
 
 (defn- widget [_ owner spec]
   (reify
@@ -92,7 +91,7 @@
 
     om/IRenderState
     (render-state [_ state]
-      (let [layout (:layout opts dumb-layout)]
+      (let [layout (:layout opts simple-layout)]
         (layout
           (fn [spec]
             (om/build widget nil

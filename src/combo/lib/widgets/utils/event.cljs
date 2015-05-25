@@ -1,4 +1,4 @@
-(ns combo.lib.widget.event
+(ns combo.lib.widgets.utils.event
   (:require [cljs.core.async :as async]
             [om.core :as om :include-macros true]))
 

@@ -1,7 +1,7 @@
-(ns combo.lib.widget.render
+(ns combo.lib.widgets.render
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
-            [combo.lib.widget.attrs :as attrs]))
+            [combo.lib.widgets.utils.attrs :as attrs]))
 
 (defn input [owner spec]
   (dom/input (clj->js (merge (attrs/basic owner spec)
