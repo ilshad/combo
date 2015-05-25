@@ -41,7 +41,7 @@
   (om/build combo/view data
     {:init-state {:commit-chan chan}
      :opts {:behavior behavior
-            :layout combo/bootstrap-form-layout
+            :layout combo/bootstrap-layout
             :widgets [{:entity :user
                        :render combo/input
                        :type "text"

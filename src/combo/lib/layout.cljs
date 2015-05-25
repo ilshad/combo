@@ -11,7 +11,7 @@
                                    (:group-class spec)))]
     (apply dom/div #js {:className css-class} content)))
 
-(defn- bootstrap-form-widget-class [spec]
+(defn- widget-class [spec]
   (spec :class
     (condp = (:render spec)
       w/button "btn btn-default"
@@ -20,7 +20,7 @@
       w/a nil
       "form-control")))
 
-(defn- bootstrap-form-widget-layout [spec]
+(defn- widget-layout [spec]
   (spec :layout
     (fn [owner content]
       (condp = (:render spec)
@@ -38,8 +38,8 @@
 (defn- extend-specs [[_ specs]]
   (for [m specs]
     (assoc m
-      :class (bootstrap-form-widget-class m)
-      :layout (bootstrap-form-widget-layout m))))
+      :class (widget-class m)
+      :layout (widget-layout m))))
 
 (defn- by-input-group [[index result] spec]
   (let [g (::input-group spec)]
@@ -47,7 +47,9 @@
       [index (update-in result [i 1] conj spec)]
       [(assoc index g (count result)) (conj result [g [spec]])])))
 
-(defn bootstrap-form-layout [widget opts]
-  (let [[_ groups] (reduce by-input-group [{} []] (:widgets opts))
-        specs (apply concat (map extend-specs groups))]
-    (apply dom/form nil (map widget specs))))
+(defn bootstrap-layout [widget opts]
+  (let [[_ groups] (reduce by-input-group [{} []] (:widgets opts))]
+    (apply dom/form nil
+      (map widget
+        (apply concat
+          (map extend-specs groups))))))

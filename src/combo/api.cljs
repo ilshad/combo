@@ -6,7 +6,7 @@
 (def view                    core/view)
 
 (def dumb-layout             layout/dumb-layout)
-(def bootstrap-form-layout   layout/bootstrap-form-layout)
+(def bootstrap-layout        layout/bootstrap-layout)
 
 (def input                   widget/input)
 (def textarea                widget/textarea)
