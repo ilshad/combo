@@ -22,7 +22,7 @@
 
     [:enable _ value]
     [[[:note :disabled (not value)]] state]
-
+    
     [entity :value value]
     (let [new-state (assoc state entity value)
           messages [[:result :value (display-result new-state)]
@@ -32,6 +32,9 @@
                                             :user "has-success")]]]
       [messages new-state])
 
+    [:clear _ _]
+    [[[:user :value ""]] (assoc state :user "")]
+    
     [:save _ _]
     [[[:combo/commit :note (display-result state)]] state]
     
@@ -45,11 +48,14 @@
             :widgets [{:entity :user
                        :render combo/input
                        :type "text"
-                       :interceptor validate-user}
-                      {:entity :reset
+                       :interceptor validate-user
+                       :input-group :user}
+                      {:entity :clear
                        :render combo/a
                        :href ""
-                       :value "OK"}
+                       :class "input-group-addon"
+                       :value "Clear"
+                       :input-group :user}
                       {:entity :city
                        :render combo/select}
                       {:entity :enable
