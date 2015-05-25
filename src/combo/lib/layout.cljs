@@ -35,14 +35,13 @@
           (some->> (:label spec) (dom/label nil))
           content)))))
 
-(defn- extend-specs [[_ specs]]
-  (for [m specs]
-    (assoc m
-      :class (widget-class m)
-      :layout (widget-layout m))))
+(defn- extend-specs [[input-group specs]]
+  (if (nil? input-group)
+    (map #(assoc % :class (widget-class %) :layout (widget-layout %))
+      specs)))
 
 (defn- by-input-group [[index result] spec]
-  (let [g (::input-group spec)]
+  (let [g (:input-group spec)]
     (if-let [i (index g)]
       [index (update-in result [i 1] conj spec)]
       [(assoc index g (count result)) (conj result [g [spec]])])))

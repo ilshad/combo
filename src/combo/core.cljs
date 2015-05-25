@@ -26,9 +26,9 @@
             change-chan
             ([v]
              (let [v (interceptor v)]
-               (if-not (nil? v)
-                 (do (om/set-state! owner :value v)
-                     (async/>! return-chan [(:entity spec) :value v])))
+               (when-not (nil? v)
+                 (om/set-state! owner :value v)
+                 (async/>! return-chan [(:entity spec) :value v]))
                (om/refresh! owner)))
             update-chan
             ([[_ attr value]]
