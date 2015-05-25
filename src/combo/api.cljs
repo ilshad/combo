@@ -1,7 +1,7 @@
 (ns combo.api
-  (:require [combo.core                  :as core]
-            [combo.lib.layouts.bootstrap :as bootstrap]
-            [combo.lib.widgets.render    :as render]))
+  (:require [combo.core              :as core]
+            [combo.layouts.bootstrap :as bootstrap]
+            [combo.widgets.render    :as render]))
 
 (def view                    core/view)
 
@@ -13,4 +13,5 @@
 (def checkbox                render/checkbox)
 (def button                  render/button)
 (def div                     render/div)
+(def span                    render/span)
 (def a                       render/a)

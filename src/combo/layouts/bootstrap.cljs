@@ -1,7 +1,7 @@
-(ns combo.lib.layouts.bootstrap
+(ns combo.layouts.bootstrap
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
-            [combo.lib.widgets.render :as widget]))
+            [combo.widgets.render :as widget]))
 
 (defn- div [class-name contents]
   (apply dom/div #js {:className class-name} contents))
@@ -34,11 +34,11 @@
           (some->> (:label spec) (dom/label nil))
           content)))))
 
-(defn- in-form-group [f specs]
+(defn- map-form-group [f specs]
   (map #(f (assoc % :class (widget-class %) :layout (widget-layout %)))
     specs))
 
-(defn- in-input-group [f specs]
+(defn- map-input-group [f specs]
   (list
     (div "form-group"
       (list
@@ -57,4 +57,4 @@
     (apply concat
       (let [[_ groups] (reduce by-input-group [{} []] (:widgets opts))]
         (for [[k specs] groups]
-          ((if (nil? k) in-form-group in-input-group) widget specs))))))
+          ((if (nil? k) map-form-group map-input-group) widget specs))))))

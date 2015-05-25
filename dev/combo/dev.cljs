@@ -52,7 +52,6 @@
                        :input-group :user}
                       {:entity :clear
                        :render combo/a
-                       :href ""
                        :class "input-group-addon"
                        :value "Clear"
                        :input-group :user}

@@ -1,7 +1,7 @@
-(ns combo.lib.widgets.render
+(ns combo.widgets.render
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
-            [combo.lib.widgets.utils.attrs :as attrs]))
+            [combo.widgets.utils.attrs :as attrs]))
 
 (defn input [owner spec]
   (dom/input (clj->js (merge (attrs/basic owner spec)
@@ -38,5 +38,5 @@
 (defn a [owner spec]
   (dom/a (clj->js (assoc (merge (attrs/basic owner spec)
                                 (attrs/click owner spec))
-                    :href (:href spec)))
+                    :href (:href spec "#")))
     (om/get-state owner :value)))

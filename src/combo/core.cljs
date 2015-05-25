@@ -2,7 +2,7 @@
   (:require-macros [cljs.core.async.macros :refer [go-loop alt!]])
   (:require [cljs.core.async :as async]
             [om.core :as om :include-macros true]
-            [combo.lib.layouts.simple :refer [simple-layout]]))
+            [combo.layouts.simple :refer [simple-layout]]))
 
 (defn- widget [_ owner spec]
   (reify
