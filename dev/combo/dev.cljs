@@ -14,7 +14,7 @@
 
 (defn- display-result [state]
   (apply str
-    (interpose ", "
+    (interpose "/ "
       (vals (select-keys state [:user :city :note])))))
 
 (defn behavior [message state]
@@ -26,10 +26,10 @@
     [entity :value value]
     (let [new-state (assoc state entity value)
           messages [[:result :value (display-result new-state)]
-                    [:user :class (case entity
-                                    :city "has-error"
-                                    :note "has-warning"
-                                    :user "has-success")]]]
+                    [:group/user :class (case entity
+                                          :city "has-error"
+                                          :note "has-warning"
+                                          :user "has-success")]]]
       [messages new-state])
 
     [:clear _ _]
@@ -45,16 +45,19 @@
     {:init-state {:commit-chan chan}
      :opts {:behavior behavior
             :layout combo/bootstrap-layout
-            :widgets [{:entity :user
-                       :render combo/input
-                       :type "text"
-                       :interceptor validate-user
-                       :input-group :user}
-                      {:entity :clear
-                       :render combo/a
-                       :class "input-group-addon"
-                       :value "Clear"
-                       :input-group :user}
+            :widgets [{:entity :group/user
+                       :render combo/div
+                       :class "form-group"
+                       :widgets [{:render combo/div
+                                  :class "input-group"
+                                  :widgets [{:entity :user
+                                             :render combo/input
+                                             :type "text"
+                                             :interceptor validate-user}
+                                            {:entity :clear
+                                             :render combo/a
+                                             :class "input-group-addon"
+                                             :value "Clear"}]}]}
                       {:entity :city
                        :render combo/select}
                       {:entity :enable

@@ -27,16 +27,20 @@
                               (attrs/click owner spec)))
     (om/get-state owner :value)))
 
-(defn div [owner spec]
-  (dom/div #js {:className (om/get-state owner :class)}
+(defn a [owner spec]
+  (dom/a (clj->js (assoc (merge (attrs/basic owner spec)
+                                (attrs/click owner spec))
+                    :href (:href spec "#")))
     (om/get-state owner :value)))
 
 (defn span [owner spec]
   (dom/span #js {:className (om/get-state owner :class)}
     (om/get-state owner :value)))
 
-(defn a [owner spec]
-  (dom/a (clj->js (assoc (merge (attrs/basic owner spec)
-                                (attrs/click owner spec))
-                    :href (:href spec "#")))
-    (om/get-state owner :value)))
+(defn div
+  ([owner spec]
+   (dom/div #js {:className (om/get-state owner :class)}
+     (om/get-state owner :value)))
+  ([owner spec widgets]
+   (apply dom/div #js {:className (om/get-state owner :class)}
+     widgets)))

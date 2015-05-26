@@ -4,7 +4,38 @@
             [om.core :as om :include-macros true]
             [combo.layouts.simple :refer [simple-layout]]))
 
-(defn- widget [_ owner spec]
+(defn- default-commit [data owner]
+  (let [in (om/get-state owner :intern-chan)
+        out (om/get-state owner :commit-chan)]
+    (go-loop []
+      (let [[_ a v :as msg] (async/<! in)]
+        (when data (om/update! data a v))
+        (when out (async/>! out msg)))
+      (recur))))
+
+(defn- setup-commit [data owner opts]
+  (let [commit (:commit opts default-commit)
+        pubc (om/get-state owner :update-pubc)
+        chan (om/get-state owner :intern-chan)]
+    (async/sub pubc :combo/commit chan)
+    (when data (commit data owner))))
+
+(defn- widget-init-state [data spec]
+  (let [props #(select-keys % [:value :options :class :disabled])]
+    (merge
+      (props spec)
+      (when-let [v (get data (:entity spec))]
+        (if (map? v)
+          (props v)
+          {:value v})))))
+
+(defn- widget-params [data owner spec]
+  {:init-state (-> (widget-init-state data spec)
+                   (assoc :update-pubc (om/get-state owner :update-pubc)
+                          :return-chan (om/get-state owner :return-chan)))
+   :opts spec})
+
+(defn- widget [data owner spec]
   (reify
     
     om/IInitState
@@ -37,34 +68,15 @@
     om/IRender
     (render [_]
       (let [layout (:layout spec (fn [_ x] x))]
-        (layout owner ((:render spec) owner spec))))))
-
-(def ^:private ubiquitous-keys [:value :options :class :disabled])
-
-(defn- widget-init-state [data spec]
-  (let [props #(select-keys % ubiquitous-keys)]
-    (merge
-      (props spec)
-      (when-let [v (get data (:entity spec))]
-        (if (map? v)
-          (props v)
-          {:value v})))))
-
-(defn- default-commit [data owner]
-  (let [in (om/get-state owner :intern-chan)
-        out (om/get-state owner :commit-chan)]
-    (go-loop []
-      (let [[_ a v :as msg] (async/<! in)]
-        (when data (om/update! data a v))
-        (when out (async/>! out msg)))
-      (recur))))
-
-(defn- setup-commit [data owner opts]
-  (let [commit (:commit opts default-commit)
-        pubc (om/get-state owner :update-pubc)
-        chan (om/get-state owner :intern-chan)]
-    (async/sub pubc :combo/commit chan)
-    (when data (commit data owner))))
+        (layout owner
+          (apply (:render spec) owner spec
+            (when-let [specs (:widgets spec)]
+              (list
+                (map
+                  (fn [child]
+                    (om/build widget (if (:widgets child) data nil)
+                      (widget-params data owner child)))
+                  specs)))))))))
 
 (defn view [data owner opts]
   (reify
@@ -89,14 +101,11 @@
               (async/>! update-chan m))
             (recur new-state)))))
 
-    om/IRenderState
-    (render-state [_ state]
+    om/IRender
+    (render [_]
       (let [layout (:layout opts simple-layout)]
         (layout
           (fn [spec]
-            (om/build widget nil
-              {:init-state (-> (widget-init-state data spec)
-                               (assoc :update-pubc (:update-pubc state)
-                                      :return-chan (:return-chan state)))
-               :opts spec}))
+            (om/build widget (if (:widgets spec) data nil)
+              (widget-params data owner spec)))
           opts)))))
