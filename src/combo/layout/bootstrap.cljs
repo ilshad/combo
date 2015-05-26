@@ -6,21 +6,23 @@
 (defn- extend-spec [spec]
   (assoc spec
 
-    :layout
-    (spec :layout
-      (fn [owner content]
-        (let [cls (or (om/get-state owner :group-class) (:group-class spec))]
-          (condp = (:render spec)
-            
-            unit/checkbox
-            (dom/div #js {:className cls}
-              (dom/div #js {:className "checkbox"}
-                (dom/label nil content (:label spec))))
-            
-            (dom/div #js {:className (str "form-group " cls)}
-              (when-let [label (:label spec)]
-                (dom/label label))
-              content)))))
+    :wrap
+    (spec :wrap
+      (if (:units spec)
+        (fn [_ x] x)
+        (fn [owner content]
+          (let [cls (or (om/get-state owner :group-class) (:group-class spec))]
+            (condp = (:render spec)
+              
+              unit/checkbox
+              (dom/div #js {:className cls}
+                (dom/div #js {:className "checkbox"}
+                  (dom/label nil content (:label spec))))
+
+              (dom/div #js {:className (str "form-group " cls)}
+                (when-let [label (:label spec)]
+                  (dom/label label))
+                content))))))
 
     :class
     (spec :class
@@ -32,7 +34,5 @@
         unit/a nil
         "form-control"))))
 
-(defn bootstrap-layout [unit opts]
-  (apply dom/div nil
-    (map (comp unit extend-spec)
-      (:units opts))))
+(defn bootstrap-layout [build opts]
+  (apply dom/div nil (map (comp build extend-spec) (:units opts))))

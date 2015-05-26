@@ -26,10 +26,10 @@
     [entity :value value]
     (let [new-state (assoc state entity value)
           messages [[:result :value (display-result new-state)]
-                    [:group/user :class (case entity
-                                          :city "has-error"
-                                          :note "has-warning"
-                                          :user "has-success")]]]
+                    [:group :class (case entity
+                                     :city "form-group has-error"
+                                     :note "form-group has-warning"
+                                     :user "form-group has-success")]]]
       [messages new-state])
 
     [:clear _ _]
@@ -45,21 +45,17 @@
     {:init-state {:commit-chan chan}
      :opts {:behavior behavior
             :layout combo/bootstrap-layout
-            :units [{:entity :group/user
+            :units [{:entity :group
                      :render combo/div
-                     :class "form-group"
-                     :layout (fn [_ x] x)
-                     :units [{:render combo/div
-                              :class "input-group"
-                              :layout (fn [_ x] x)
-                              :units [{:entity :user
-                                       :render combo/input
-                                       :type "text"
-                                       :interceptor validate-user}
-                                      {:entity :clear
-                                       :render combo/a
-                                       :class "input-group-addon"
-                                       :value "Clear"}]}]}
+                     :class "input-group"
+                     :units [{:entity :user
+                              :render combo/input
+                              :type "text"
+                              :interceptor validate-user}
+                             {:entity :clear
+                              :render combo/a
+                              :class "input-group-addon"
+                              :value "Clear"}]}
                     {:entity :city
                      :render combo/select}
                     {:entity :enable

@@ -4,6 +4,8 @@
             [om.core :as om :include-macros true]
             [combo.layout.simple :refer [simple-layout]]))
 
+(declare unit)
+
 (defn- default-commit [data owner]
   (let [in (om/get-state owner :intern-chan)
         out (om/get-state owner :commit-chan)]
@@ -13,12 +15,21 @@
         (when out (async/>! out msg)))
       (recur))))
 
-(defn- setup-commit [data owner opts]
-  (let [commit (:commit opts default-commit)
+(defn- setup-commit [data owner spec]
+  (let [commit (:commit spec default-commit)
         pubc (om/get-state owner :update-pubc)
         chan (om/get-state owner :intern-chan)]
     (async/sub pubc :combo/commit chan)
     (when data (commit data owner))))
+
+(defn- setup-behavior [owner spec]
+  (let [behavior (:behavior spec (fn [_ s] [[] s]))
+        return-chan (om/get-state owner :return-chan)
+        update-chan (om/get-state owner :update-chan)]
+    (go-loop [state {}]
+      (let [[messages new-state] (behavior (async/<! return-chan) state)]
+        (doseq [m messages] (async/>! update-chan m))
+        (recur new-state)))))
 
 (defn- unit-init-state [data spec]
   (let [props #(select-keys % [:value :options :class :disabled])]
@@ -29,11 +40,27 @@
           (props v)
           {:value v})))))
 
-(defn- unit-params [data owner spec]
-  {:init-state (-> (unit-init-state data spec)
-                   (assoc :update-pubc (om/get-state owner :update-pubc)
-                          :return-chan (om/get-state owner :return-chan)))
-   :opts spec})
+(defn- unit-params [data owner spec layout]
+  {:init-state (assoc (unit-init-state data spec)
+                 :update-pubc (om/get-state owner :update-pubc)
+                 :return-chan (om/get-state owner :return-chan))
+   :opts (if (:units spec) (assoc spec :layout layout) spec)})
+
+(defn- build [data owner layout]
+  (fn [spec]
+    (om/build unit data
+      (unit-params data owner spec layout))))
+
+(defn- nested [data owner spec]
+  (when-let [specs (:units spec)]
+    (list (map (build data owner (:layout spec)) specs))))
+
+(defn- spec->dom [data owner]
+  (fn [spec]
+    (let [wrap (:wrap spec (fn [owner content] content))
+          units (nested data owner spec)
+          content (apply (:render spec) owner spec units)]
+      (wrap owner content))))
 
 (defn- unit [data owner spec]
   (reify
@@ -67,18 +94,12 @@
 
     om/IRender
     (render [_]
-      (let [layout (:layout spec (fn [_ x] x))]
-        (layout owner
-          (apply (:render spec) owner spec
-            (when-let [specs (:units spec)]
-              (list
-                (map
-                  (fn [child]
-                    (om/build unit (if (:units child) data nil)
-                      (unit-params data owner child)))
-                  specs)))))))))
+      (let [f (spec->dom data owner)]
+        (if-let [layout (:layout spec)]
+          (layout f spec)
+          (f spec))))))
 
-(defn view [data owner opts]
+(defn view [data owner spec]
   (reify
 
     om/IInitState
@@ -91,21 +112,10 @@
 
     om/IWillMount
     (will-mount [_]
-      (let [behavior (:behavior opts (fn [_ s] [[] s]))
-            return-chan (om/get-state owner :return-chan)
-            update-chan (om/get-state owner :update-chan)]
-        (setup-commit data owner opts)
-        (go-loop [state {}]
-          (let [[messages new-state] (behavior (async/<! return-chan) state)]
-            (doseq [m messages]
-              (async/>! update-chan m))
-            (recur new-state)))))
+      (setup-commit data owner spec)
+      (setup-behavior owner spec))
 
     om/IRender
     (render [_]
-      (let [layout (:layout opts simple-layout)]
-        (layout
-          (fn [spec]
-            (om/build unit (if (:units spec) data nil)
-              (unit-params data owner spec)))
-          opts)))))
+      (let [layout (:layout spec simple-layout)]
+        (layout (build data owner layout) spec)))))
