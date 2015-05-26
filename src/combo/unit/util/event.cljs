@@ -1,4 +1,4 @@
-(ns combo.units.utils.event
+(ns combo.unit.util.event
   (:require [cljs.core.async :as async]
             [om.core :as om :include-macros true]))
 

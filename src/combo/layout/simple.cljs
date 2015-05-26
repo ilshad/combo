@@ -1,4 +1,4 @@
-(ns combo.layouts.simple
+(ns combo.layout.simple
   (:require [om.dom :as dom :include-macros true]))
 
 (defn simple-layout [unit opts]

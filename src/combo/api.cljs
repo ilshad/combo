@@ -1,7 +1,7 @@
 (ns combo.api
-  (:require [combo.core              :as core]
-            [combo.layouts.bootstrap :as bootstrap]
-            [combo.units.render      :as render]))
+  (:require [combo.core             :as core]
+            [combo.layout.bootstrap :as bootstrap]
+            [combo.unit.render      :as render]))
 
 (def view                    core/view)
 

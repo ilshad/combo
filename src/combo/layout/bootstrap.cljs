@@ -1,7 +1,7 @@
-(ns combo.layouts.bootstrap
+(ns combo.layout.bootstrap
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
-            [combo.units.render :as unit]))
+            [combo.unit.render :as unit]))
 
 (defn- extend-spec [spec]
   (assoc spec

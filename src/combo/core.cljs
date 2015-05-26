@@ -2,7 +2,7 @@
   (:require-macros [cljs.core.async.macros :refer [go-loop alt!]])
   (:require [cljs.core.async :as async]
             [om.core :as om :include-macros true]
-            [combo.layouts.simple :refer [simple-layout]]))
+            [combo.layout.simple :refer [simple-layout]]))
 
 (defn- default-commit [data owner]
   (let [in (om/get-state owner :intern-chan)
