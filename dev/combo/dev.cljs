@@ -45,34 +45,36 @@
     {:init-state {:commit-chan chan}
      :opts {:behavior behavior
             :layout combo/bootstrap-layout
-            :widgets [{:entity :group/user
-                       :render combo/div
-                       :class "form-group"
-                       :widgets [{:render combo/div
-                                  :class "input-group"
-                                  :widgets [{:entity :user
-                                             :render combo/input
-                                             :type "text"
-                                             :interceptor validate-user}
-                                            {:entity :clear
-                                             :render combo/a
-                                             :class "input-group-addon"
-                                             :value "Clear"}]}]}
-                      {:entity :city
-                       :render combo/select}
-                      {:entity :enable
-                       :render combo/checkbox
-                       :label "Enable note field"}
-                      {:entity :note
-                       :disabled true
-                       :render combo/textarea
-                       :label "Note"}
-                      {:entity :save
-                       :render combo/button
-                       :value "Save"
-                       :class "btn btn-success btn-block"}
-                      {:entity :result
-                       :render combo/div}]}}))
+            :units [{:entity :group/user
+                     :render combo/div
+                     :class "form-group"
+                     :layout (fn [_ x] x)
+                     :units [{:render combo/div
+                              :class "input-group"
+                              :layout (fn [_ x] x)
+                              :units [{:entity :user
+                                       :render combo/input
+                                       :type "text"
+                                       :interceptor validate-user}
+                                      {:entity :clear
+                                       :render combo/a
+                                       :class "input-group-addon"
+                                       :value "Clear"}]}]}
+                    {:entity :city
+                     :render combo/select}
+                    {:entity :enable
+                     :render combo/checkbox
+                     :label "Enable note field"}
+                    {:entity :note
+                     :disabled true
+                     :render combo/textarea
+                     :label "Note"}
+                    {:entity :save
+                     :render combo/button
+                     :value "Save"
+                     :class "btn btn-success btn-block"}
+                    {:entity :result
+                     :render combo/div}]}}))
 
 (defn root [data owner]
   (reify

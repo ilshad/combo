@@ -20,7 +20,7 @@
     (async/sub pubc :combo/commit chan)
     (when data (commit data owner))))
 
-(defn- widget-init-state [data spec]
+(defn- unit-init-state [data spec]
   (let [props #(select-keys % [:value :options :class :disabled])]
     (merge
       (props spec)
@@ -29,13 +29,13 @@
           (props v)
           {:value v})))))
 
-(defn- widget-params [data owner spec]
-  {:init-state (-> (widget-init-state data spec)
+(defn- unit-params [data owner spec]
+  {:init-state (-> (unit-init-state data spec)
                    (assoc :update-pubc (om/get-state owner :update-pubc)
                           :return-chan (om/get-state owner :return-chan)))
    :opts spec})
 
-(defn- widget [data owner spec]
+(defn- unit [data owner spec]
   (reify
     
     om/IInitState
@@ -70,12 +70,12 @@
       (let [layout (:layout spec (fn [_ x] x))]
         (layout owner
           (apply (:render spec) owner spec
-            (when-let [specs (:widgets spec)]
+            (when-let [specs (:units spec)]
               (list
                 (map
                   (fn [child]
-                    (om/build widget (if (:widgets child) data nil)
-                      (widget-params data owner child)))
+                    (om/build unit (if (:units child) data nil)
+                      (unit-params data owner child)))
                   specs)))))))))
 
 (defn view [data owner opts]
@@ -106,6 +106,6 @@
       (let [layout (:layout opts simple-layout)]
         (layout
           (fn [spec]
-            (om/build widget (if (:widgets spec) data nil)
-              (widget-params data owner spec)))
+            (om/build unit (if (:units spec) data nil)
+              (unit-params data owner spec)))
           opts)))))

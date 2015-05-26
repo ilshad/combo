@@ -1,7 +1,7 @@
-(ns combo.widgets.render
+(ns combo.units.render
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
-            [combo.widgets.utils.attrs :as attrs]))
+            [combo.units.utils.attrs :as attrs]))
 
 (defn input [owner spec]
   (dom/input (clj->js (merge (attrs/basic owner spec)
@@ -41,6 +41,6 @@
   ([owner spec]
    (dom/div #js {:className (om/get-state owner :class)}
      (om/get-state owner :value)))
-  ([owner spec widgets]
+  ([owner spec units]
    (apply dom/div #js {:className (om/get-state owner :class)}
-     widgets)))
+     units)))
