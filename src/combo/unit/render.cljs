@@ -41,6 +41,7 @@
   ([owner spec]
    (dom/div #js {:className (om/get-state owner :class)}
      (om/get-state owner :value)))
-  ([owner spec units]
+
+  ([owner spec & units]
    (apply dom/div #js {:className (om/get-state owner :class)}
      units)))

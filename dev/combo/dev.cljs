@@ -47,15 +47,18 @@
             :layout combo/bootstrap-layout
             :units [{:entity :group
                      :render combo/div
-                     :class "input-group"
-                     :units [{:entity :user
-                              :render combo/input
-                              :type "text"
-                              :interceptor validate-user}
-                             {:entity :clear
-                              :render combo/a
-                              :class "input-group-addon"
-                              :value "Clear"}]}
+                     :class "form-group"
+                     :units [{:entity 42
+                              :render combo/div
+                              :class "input-group"
+                              :units [{:entity :user
+                                       :render combo/input
+                                       :type "text"
+                                       :interceptor validate-user}
+                                      {:entity :clear
+                                       :render combo/a
+                                       :class "input-group-addon"
+                                       :value "Clear"}]}]}
                     {:entity :city
                      :render combo/select}
                     {:entity :enable

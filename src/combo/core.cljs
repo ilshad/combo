@@ -2,6 +2,7 @@
   (:require-macros [cljs.core.async.macros :refer [go-loop alt!]])
   (:require [cljs.core.async :as async]
             [om.core :as om :include-macros true]
+            [om.dom :as dom :include-macros true]
             [combo.layout.simple :refer [simple-layout]]))
 
 (declare unit)
@@ -52,15 +53,8 @@
       (unit-params data owner spec layout))))
 
 (defn- nested [data owner spec]
-  (when-let [specs (:units spec)]
-    (list (map (build data owner (:layout spec)) specs))))
-
-(defn- spec->dom [data owner]
-  (fn [spec]
-    (let [wrap (:wrap spec (fn [owner content] content))
-          units (nested data owner spec)
-          content (apply (:render spec) owner spec units)]
-      (wrap owner content))))
+  (when-let [units (:units spec)]
+    (map (build data owner (:layout spec)) units)))
 
 (defn- unit [data owner spec]
   (reify
@@ -94,10 +88,10 @@
 
     om/IRender
     (render [_]
-      (let [f (spec->dom data owner)]
-        (if-let [layout (:layout spec)]
-          (layout f spec)
-          (f spec))))))
+      (let [wrap (:wrap spec (fn [_ x] x))
+            units (nested data owner spec)
+            content (apply (:render spec) owner spec units)]
+        (wrap owner content)))))
 
 (defn view [data owner spec]
   (reify

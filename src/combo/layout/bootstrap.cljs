@@ -34,5 +34,5 @@
         unit/a nil
         "form-control"))))
 
-(defn bootstrap-layout [build opts]
-  (apply dom/div nil (map (comp build extend-spec) (:units opts))))
+(defn bootstrap-layout [build {units :units}]
+  (apply dom/div nil (map (comp build extend-spec) units)))
