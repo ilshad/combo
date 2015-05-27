@@ -54,10 +54,12 @@
                               :units [{:entity :user
                                        :render combo/input
                                        :type "text"
+                                       :no-form-group true
                                        :interceptor validate-user}
                                       {:entity :clear
                                        :render combo/a
                                        :class "input-group-addon"
+                                       :no-form-group true
                                        :value "Clear"}]}]}
                     {:entity :city
                      :render combo/select}

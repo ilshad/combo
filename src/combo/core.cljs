@@ -2,10 +2,19 @@
   (:require-macros [cljs.core.async.macros :refer [go-loop alt!]])
   (:require [cljs.core.async :as async]
             [om.core :as om :include-macros true]
-            [om.dom :as dom :include-macros true]
-            [combo.layout.simple :refer [simple-layout]]))
+            [om.dom :as dom :include-macros true]))
 
 (declare unit)
+
+(defprotocol ILayout
+  (unit-spec [this spec])
+  (render-view [this build spec]))
+
+(def default-layout
+  (reify ILayout
+    (unit-spec [_ spec] spec)
+    (render-view [_ build spec]
+      (apply dom/div nil (map build (:units spec))))))
 
 (defn- default-commit [data owner]
   (let [in (om/get-state owner :intern-chan)
@@ -45,12 +54,12 @@
   {:init-state (assoc (unit-init-state data spec)
                  :update-pubc (om/get-state owner :update-pubc)
                  :return-chan (om/get-state owner :return-chan))
-   :opts (if (:units spec) (assoc spec :layout layout) spec)})
+   :opts (assoc spec :layout layout)})
 
 (defn- build [data owner layout]
   (fn [spec]
     (om/build unit data
-      (unit-params data owner spec layout))))
+      (unit-params data owner (unit-spec layout spec) layout))))
 
 (defn- nested [data owner spec]
   (when-let [units (:units spec)]
@@ -111,5 +120,5 @@
 
     om/IRender
     (render [_]
-      (let [layout (:layout spec simple-layout)]
-        (layout (build data owner layout) spec)))))
+      (let [layout (:layout spec default-layout)]
+        (render-view layout (build data owner layout) spec)))))

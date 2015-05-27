@@ -5,6 +5,8 @@
 
 (def view                    core/view)
 
+(def ILayout                 core/ILayout)
+
 (def bootstrap-layout        bootstrap/bootstrap-layout)
 
 (def input                   render/input)
