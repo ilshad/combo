@@ -17,6 +17,9 @@
     (interpose "/ "
       (vals (select-keys state [:user :city :note])))))
 
+(defn commit [args]
+  (println "Received commit message from Combo:" (:message args)))
+
 (defn behavior [message state]
   (match message
 
@@ -40,10 +43,10 @@
     
     :else [[] state]))
 
-(defn view [data chan]
+(defn view [data]
   (om/build combo/view data
-    {:init-state {:commit-chan chan}
-     :opts {:behavior behavior
+    {:opts {:commit commit
+            :behavior behavior
             :layout combo/bootstrap-layout
             :units [{:entity :group
                      :render combo/div
@@ -81,27 +84,12 @@
                      :render combo/div}]}}))
 
 (defn root [data owner]
-  (reify
-
-    om/IInitState
-    (init-state [_]
-      {:chan (async/chan)})
-
-    om/IWillMount
-    (will-mount [_]
-      (let [c (om/get-state owner :chan)]
-        (go-loop []
-          (let [v (async/<! c)]
-            (println "Received message from Combo:" v))
-          (recur))))
-    
-    om/IRender
-    (render [_]
-      (dom/div #js {:className "container"}
-        (dom/div #js {:className "row"}
-          (dom/div #js {:className "col-xs-6 col-xs-push-3"}
-            (dom/br nil)
-            (view data (om/get-state owner :chan))))))))
+  (om/component
+    (dom/div #js {:className "container"}
+      (dom/div #js {:className "row"}
+        (dom/div #js {:className "col-xs-6 col-xs-push-3"}
+          (dom/br nil)
+          (view data))))))
 
 (def app-state
   (atom {:agree? true

@@ -12,25 +12,30 @@
 
 (def default-layout
   (reify ILayout
-    (render [_ build {units :units}]
-      (apply dom/div nil (map build units)))
-    (control [_ spec] spec)))
+    (render [_ build spec]
+      (apply dom/div nil (map build (:units spec))))
+    (control [_ spec]
+      spec)))
 
-(defn- default-commit [data owner]
-  (let [in (om/get-state owner :intern-chan)
-        out (om/get-state owner :commit-chan)]
-    (go-loop []
-      (let [[_ a v :as msg] (async/<! in)]
-        (when data (om/update! data a v))
-        (when out (async/>! out msg)))
-      (recur))))
+(defn- default-commit [{:keys [chan data owner message]}]
+  (when data
+    (let [[_ attr value] message]
+      (om/update! data attr value)))
+  (when chan (async/put! chan message)))
 
 (defn- setup-commit [data owner spec]
   (let [commit (:commit spec default-commit)
-        pubc (om/get-state owner :update-pubc)
-        chan (om/get-state owner :intern-chan)]
-    (async/sub pubc :combo/commit chan)
-    (when data (commit data owner))))
+        pubc   (om/get-state owner :update-pubc)
+        in     (om/get-state owner :intern-chan)
+        out    (om/get-state owner :commit-chan)]
+    (async/sub pubc :combo/commit in)
+    (go-loop []
+      (let [message (async/<! in)]
+        (commit {:chan out
+                 :data data
+                 :owner owner
+                 :message message}))
+      (recur))))
 
 (defn- setup-behavior [owner spec]
   (let [behavior (:behavior spec (fn [_ s] [[] s]))
