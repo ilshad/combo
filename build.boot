@@ -1,5 +1,5 @@
 (task-options!
-  pom {:project     'ilshad/combo
+  pom {:project     'combo
        :version     "0.1.0-SNAPSHOT"
        :description ""
        :url         "https://github.com/ilshad/combo"

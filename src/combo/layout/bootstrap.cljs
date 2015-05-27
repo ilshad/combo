@@ -18,8 +18,7 @@
           (if (:units spec)
             (fn [_ x] x)
             (fn [owner content]
-              (if (:no-form-group spec)
-                content
+              (if (:pretty? spec)
                 (let [cls (or (om/get-state owner :group-class)
                               (:group-class spec))]
                   (condp = (:render spec)
@@ -30,7 +29,8 @@
                     (dom/div #js {:className (str "form-group " cls)}
                       (when-let [label (:label spec)]
                         (dom/label label))
-                      content)))))))
+                      content)))
+                content))))
         
         :class
         (spec :class
