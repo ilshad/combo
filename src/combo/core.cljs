@@ -7,14 +7,14 @@
 (declare unit)
 
 (defprotocol ILayout
-  (unit-spec [this spec])
-  (render-view [this build spec]))
+  (render [this build spec])
+  (control [this spec]))
 
 (def default-layout
   (reify ILayout
-    (unit-spec [_ spec] spec)
-    (render-view [_ build spec]
-      (apply dom/div nil (map build (:units spec))))))
+    (render [_ build {units :units}]
+      (apply dom/div nil (map build units)))
+    (control [_ spec] spec)))
 
 (defn- default-commit [data owner]
   (let [in (om/get-state owner :intern-chan)
@@ -59,7 +59,7 @@
 (defn- build [data owner layout]
   (fn [spec]
     (om/build unit data
-      (unit-params data owner (unit-spec layout spec) layout))))
+      (unit-params data owner (control layout spec) layout))))
 
 (defn- nested [data owner spec]
   (when-let [units (:units spec)]
@@ -121,4 +121,4 @@
     om/IRender
     (render [_]
       (let [layout (:layout spec default-layout)]
-        (render-view layout (build data owner layout) spec)))))
+        (render layout (build data owner layout) spec)))))

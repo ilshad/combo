@@ -5,11 +5,12 @@
             [combo.core :as combo]))
 
 (def bootstrap-layout
-  (reify
+  (reify combo/ILayout
     
-    combo/ILayout
-    
-    (unit-spec [_ spec]
+    (render [_ build {units :units}]
+      (apply dom/div nil (map build units)))
+
+    (control [_ spec]
       (assoc spec
         
         :wrap
@@ -39,9 +40,6 @@
             unit/span nil
             unit/div nil
             unit/a nil
-            "form-control"))))
-    
-    (render-view [_ build {units :units}]
-      (apply dom/div nil (map build units)))))
+            "form-control"))))))
 
 
