@@ -1,6 +1,8 @@
+(def +version+ "0.1.0-SNAPSHOT")
+
 (task-options!
   pom {:project     'combo
-       :version     "0.1.0-SNAPSHOT"
+       :version     +version+
        :description ""
        :url         "https://github.com/ilshad/combo"
        :scm         {:url "https://github.com/ilshad/combo"}
@@ -10,20 +12,25 @@
 (set-env!
   :source-paths #{"src"}
   :resource-paths #{"src"}
-  :dependencies '[[org.clojure/clojure       "1.7.0-beta1"]
-                  [org.clojure/clojurescript "0.0-3196"]
-                  [org.clojure/core.async    "0.1.346.0-17112a-alpha"]
-                  [org.omcljs/om             "0.8.8"]
-                  
-                  [adzerk/boot-cljs          "0.0-2814-4"]
-                  [adzerk/boot-reload        "0.2.6"]
-                  [adzerk/boot-cljs-repl     "0.1.9"]
-                  [pandeiro/boot-http        "0.6.3-SNAPSHOT"]])
+  :dependencies '[[org.clojure/clojure       "1.7.0-beta1" :scope "provided"]
+                  [org.clojure/clojurescript "0.0-3196"    :scope "provided"]
+                  [org.clojure/core.async    "0.1.346.0-17112a-alpha"
+                                                     :scope "provided"]
+                  [org.omcljs/om             "0.8.8" :scope "provided"]
+
+                  [adzerk/boot-cljs          "0.0-2814-4"     :scope "test"]
+                  [adzerk/boot-reload        "0.2.6"          :scope "test"]
+                  [adzerk/boot-cljs-repl     "0.1.9"          :scope "test"]
+                  [pandeiro/boot-http        "0.6.3-SNAPSHOT" :scope "test"]
+                  [adzerk/bootlaces          "0.1.11"         :scope "test"]])
 
 (require '[adzerk.boot-cljs      :refer [cljs]]
          '[adzerk.boot-reload    :refer [reload]]
          '[adzerk.boot-cljs-repl :refer [cljs-repl start-repl]]
-         '[pandeiro.boot-http    :refer [serve]])
+         '[pandeiro.boot-http    :refer [serve]]
+         '[adzerk.bootlaces      :refer :all])
+
+(bootlaces! +version+)
 
 (defn dev-env! []
   (merge-env!

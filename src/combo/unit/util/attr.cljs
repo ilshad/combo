@@ -4,12 +4,14 @@
             [combo.unit.util.event :as event]))
 
 (defn basic [owner spec]
-  {:className (om/get-state owner :class)
-   :disabled  (om/get-state owner :disabled)})
+  {:className (om/get-state owner :class)})
 
 (defn field [owner spec]
+  {:name      (:name spec)
+   :disabled  (om/get-state owner :disabled)})
+
+(defn value [owner spec]
   {:value     (om/get-state owner :value)
-   :name      (:name spec)
    :onChange  (event/on-change owner)
    :onFocus   (event/focus? owner (:entity spec) true)
    :onBlur    (event/focus? owner (:entity spec) false)})
@@ -18,7 +20,7 @@
   {:type        (:type spec)
    :placeholder (:placeholder spec)})
 
-(defn checkbox [owner spec]
+(defn check [owner spec]
   {:type     "checkbox"
    :checked  (om/get-state owner :value)
    :onChange (fn [e]
