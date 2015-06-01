@@ -14,6 +14,7 @@
 (def textarea                render/textarea)
 (def checkbox                render/checkbox)
 (def button                  render/button)
+(def form                    render/form)
 (def span                    render/span)
 (def div                     render/div)
 (def a                       render/a)

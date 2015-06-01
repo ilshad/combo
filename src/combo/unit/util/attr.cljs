@@ -32,3 +32,11 @@
               (async/put! (om/get-state owner :return-chan)
                 [(:entity spec) :click (event/event-keys e)])
               (.preventDefault e))})
+
+(defn form [owner spec]
+  {:method (:method spec)
+   :action (:action spec)
+   :onSubmit (fn [e]
+               (async/put! (om/get-state owner :return-chan)
+                 [(:entity spec) :submit true])
+               (.preventDefault e))})

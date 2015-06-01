@@ -42,6 +42,13 @@
              (attr/click owner spec)))
     (om/get-state owner :value)))
 
+(defn form [owner spec units]
+  (apply dom/form
+    (clj->js
+      (merge (attr/basic owner spec)
+             (attr/form  owner spec)))
+    units))
+
 (defn a [owner spec]
   (dom/a
     (clj->js
@@ -59,6 +66,6 @@
    (dom/div (clj->js (attr/basic owner spec))
      (om/get-state owner :value)))
 
-  ([owner spec & units]
+  ([owner spec units]
    (apply dom/div (clj->js (attr/basic owner spec))
      units)))

@@ -70,6 +70,12 @@
   (when-let [units (:units spec)]
     (map (build data owner (:layout spec)) units)))
 
+(defn- render-unit [owner spec units]
+  (let [f (:render spec)]
+    (if units
+      (f owner spec units)
+      (f owner spec))))
+
 (defn- unit [data owner spec]
   (reify
     
@@ -104,7 +110,7 @@
     (render [_]
       (let [wrap (:wrap spec (fn [_ x] x))
             units (nested data owner spec)
-            content (apply (:render spec) owner spec units)]
+            content (render-unit owner spec units)]
         (wrap owner content)))))
 
 (defn view [data owner spec]

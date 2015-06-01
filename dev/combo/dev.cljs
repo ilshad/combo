@@ -40,7 +40,7 @@
     
     [:save _ _]
     [[[:combo/commit :note (display-result state)]] state]
-    
+
     :else [[] state]))
 
 (defn view [data]
@@ -78,7 +78,7 @@
                      :render combo/button
                      :value "Save"
                      :pretty? true
-                     :class "btn btn-success btn-block"}
+                     :class "btn btn-primary btn-block"}
                     {:entity :result
                      :pretty? true
                      :render combo/div}]}}))

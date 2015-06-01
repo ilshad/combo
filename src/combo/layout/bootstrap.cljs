@@ -35,11 +35,12 @@
         :class
         (spec :class
           (condp = (:render spec)
-            unit/button "btn btn-default"
+            unit/button   "btn btn-default"
             unit/checkbox nil
-            unit/span nil
-            unit/div nil
-            unit/a nil
+            unit/span     nil
+            unit/form     nil
+            unit/div      nil
+            unit/a        nil
             "form-control"))))))
 
 
