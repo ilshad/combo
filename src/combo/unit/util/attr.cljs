@@ -4,7 +4,8 @@
             [combo.unit.util.event :as event]))
 
 (defn basic [owner spec]
-  {:className (om/get-state owner :class)})
+  {:id        (:id spec)
+   :className (om/get-state owner :class)})
 
 (defn field [owner spec]
   {:name      (:name spec)
