@@ -7,21 +7,20 @@
 (declare unit)
 
 (defprotocol ILayout
-  (render [this build spec])
+  (render  [this build spec])
   (control [this spec]))
 
 (def default-layout
   (reify ILayout
-    (render [_ build spec]
-      (apply dom/div nil (map build (:units spec))))
-    (control [_ spec]
-      spec)))
+    (render  [_ build spec] (apply dom/div nil (map build (:units spec))))
+    (control [_ spec] spec)))
 
 (defn- default-commit [{:keys [chan data owner message]}]
+  (when chan
+    (async/put! chan message))
   (when data
     (let [[_ attr value] message]
-      (om/update! data attr value)))
-  (when chan (async/put! chan message)))
+      (om/update! data attr value))))
 
 (defn- setup-commit [data owner spec]
   (let [commit (:commit spec default-commit)
