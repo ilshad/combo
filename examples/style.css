@@ -7,3 +7,35 @@ body {
     font-size: 175%;
     color: #777;
 }
+
+.cell {
+    padding: 0;
+    border: 1px solid #ddd;
+    height: 35px;
+    font-size: 125%;
+}
+
+.cell.formula-mode {
+    border: 1px dashed red;
+}
+
+.cell a {
+    height: 35px;
+    line-height: 35px;
+}
+
+.cell input {
+    border: 0;
+    border-radius: 0;
+    height: 33px;
+    background-color: #FEFFC2;
+    font-size: inherit;
+}
+
+.cell.edit-mode    a { display: none; }
+.cell.formula-mode a { display: none; }
+.cell.display-mode a { display: block; }
+
+.cell.edit-mode    input { display: block; }
+.cell.formula-mode input { display: block; }
+.cell.display-mode input { display: none; }

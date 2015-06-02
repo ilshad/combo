@@ -13,11 +13,10 @@
         (dom/ul
           (dom/li
             (dom/a {:href "https://github.com/ilshad/combo" :target "_blank"}
-              "Combo home page")))))))
-
-(def screens
-  {:about about
-   :spreadsheet spreadsheet/spreadsheet})
+              "Combo home page"))
+          (dom/li
+            (dom/a {:href "https://github.com/ilshad/combo/blob/master/examples/examples/spreadsheet.cljs" :target "_blank"}
+              "Spreadsheet source code")))))))
 
 (defn menu-item [app screen title]
   (dom/li {:class (when (= (:screen app) screen) "active")}
@@ -36,6 +35,10 @@
         (menu-item app :about "About")
         (menu-item app :spreadsheet "Spreadsheet")))))
 
+(def screens
+  {:about about
+   :spreadsheet spreadsheet/spreadsheet})
+
 (defn root [app owner]
   (om/component
     (dom/div {:class "container"}
@@ -43,7 +46,7 @@
       (om/build (screens (:screen app)) app))))
 
 (defn main []
-  (om/root root (atom {:screen :about})
+  (om/root root (atom {:screen :spreadsheet})
     {:target js/document.body}))
 
 (set! (.-onload js/window) main)
