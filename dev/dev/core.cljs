@@ -1,10 +1,8 @@
-(ns combo.dev
-  (:require-macros [cljs.core.async.macros :refer [go-loop]])
-  (:require [cljs.core.async :as async]
-            [om.core :as om :include-macros true]
-            [om.dom :as dom :include-macros true]
+(ns dev.core
+  (:require [combo.api :as combo]
             [cljs.core.match :refer-macros [match]]
-            [combo.api :as combo]))
+            [om-tools.dom :as dom :include-macros true]
+            [om.core :as om :include-macros true]))
 
 (enable-console-print!)
 
@@ -85,10 +83,10 @@
 
 (defn root [data owner]
   (om/component
-    (dom/div #js {:className "container"}
-      (dom/div #js {:className "row"}
-        (dom/div #js {:className "col-xs-6 col-xs-push-3"}
-          (dom/br nil)
+    (dom/div {:class "container"}
+      (dom/div {:class "row"}
+        (dom/div {:class "col-xs-6 col-xs-push-3"}
+          (dom/br)
           (view data))))))
 
 (def app-state

@@ -1,0 +1,9 @@
+body {
+    font: 15px Consolas, 'Menlo', monospace;
+}
+
+.navbar-brand {
+    padding-left: 0;
+    font-size: 175%;
+    color: #777;
+}

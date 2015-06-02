@@ -32,23 +32,51 @@
 
 (bootlaces! +version+)
 
-(defn dev-env! []
-  (merge-env!
-    :source-paths #{"dev"}
-    :resource-paths #{"dev"}
-    :dependencies '[[org.clojure/core.match "0.3.0-alpha4"]]))
+;; Examples
 
-(deftask dev []
-  (dev-env!)
+(defn examples-env! []
+  (merge-env!
+    :source-paths #{"examples"}
+    :resource-paths #{"examples"}
+    :dependencies '[[org.clojure/core.match "0.3.0-alpha4"]
+                    [prismatic/om-tools "0.3.10"]]))
+
+(deftask examples []
+  (examples-env!)
   (comp (serve :dir "target")
         (watch)
-        (reload :on-jsload 'combo.dev/main)
+        (reload :on-jsload 'examples.core/main)
         (cljs-repl)
         (cljs :optimizations :none
               :source-map    true
               :unified-mode  true)))
 
-(deftask staging []
+(deftask examples-advanced []
+  (examples-env!)
+  (comp (serve :dir "target")
+        (cljs :optimizations :advanced)
+        (wait)))
+
+;; Development
+
+(defn dev-env! []
+  (merge-env!
+    :source-paths #{"dev"}
+    :resource-paths #{"dev"}
+    :dependencies '[[org.clojure/core.match "0.3.0-alpha4"]
+                    [prismatic/om-tools "0.3.10"]]))
+
+(deftask dev []
+  (dev-env!)
+  (comp (serve :dir "target")
+        (watch)
+        (reload :on-jsload 'dev.core/main)
+        (cljs-repl)
+        (cljs :optimizations :none
+              :source-map    true
+              :unified-mode  true)))
+
+(deftask dev-advanced []
   (dev-env!)
   (comp (serve :dir "target")
         (cljs :optimizations :advanced)
