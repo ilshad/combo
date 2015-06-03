@@ -9,7 +9,8 @@
       (merge (attr/basic owner spec)
              (attr/field owner spec)
              (attr/value owner spec)
-             (attr/input owner spec)))))
+             (attr/input owner spec)
+             (attr/onkey owner spec)))))
 
 (defn textarea [owner spec]
   (dom/textarea

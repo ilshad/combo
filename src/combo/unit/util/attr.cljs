@@ -41,3 +41,10 @@
                (async/put! (om/get-state owner :return-chan)
                  [(:entity spec) :submit true])
                (.preventDefault e))})
+
+(defn onkey [owner spec]
+  (merge {}
+    (when-let [k (:on-key-up spec)]
+      {:onKeyUp (event/key-code-return owner (:entity spec) :key-up k)})
+    (when-let [k (:on-key-down spec)]
+      {:onKeyDown (event/key-code-return owner (:entity spec) :key-down k)})))

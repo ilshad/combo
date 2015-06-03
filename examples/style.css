@@ -2,6 +2,11 @@ body {
     font: 15px Consolas, 'Menlo', monospace;
 }
 
+.navbar {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
 .navbar-brand {
     padding-left: 0;
     font-size: 175%;
@@ -12,11 +17,14 @@ body {
     padding: 0;
     border: 1px solid #ddd;
     height: 35px;
-    font-size: 125%;
 }
 
 .cell.formula-mode {
     border: 1px dashed red;
+}
+
+.cell.source-mode {
+    border: 1px dashed blue;
 }
 
 .cell a {
@@ -29,13 +37,14 @@ body {
     border-radius: 0;
     height: 33px;
     background-color: #FEFFC2;
-    font-size: inherit;
 }
 
 .cell.edit-mode    a { display: none; }
 .cell.formula-mode a { display: none; }
 .cell.display-mode a { display: block; }
+.cell.source-mode  a { display: block; }
 
 .cell.edit-mode    input { display: block; }
 .cell.formula-mode input { display: block; }
 .cell.display-mode input { display: none; }
+.cell.source-mode  input { display: none; }
