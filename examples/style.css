@@ -30,6 +30,12 @@ body {
 .cell a {
     height: 35px;
     line-height: 35px;
+    padding: 6px 11px;
+    line-height: 1.42;
+}
+
+.cell a:hover {
+    text-decoration: none;
 }
 
 .cell input {

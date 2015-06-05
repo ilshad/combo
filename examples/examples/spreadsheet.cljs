@@ -4,55 +4,67 @@
             [om-tools.dom :as dom :include-macros true]
             [om.core :as om :include-macros true]))
 
-(defn cell-mode [mode x y]
-  [[:cell x y] :class (str mode " cell col-xs-2")])
+(defn cell-mode [mode]
+  (fn [xy]
+    [[:cell xy] :class (str mode " cell col-xs-2")]))
 
-(def edit-mode    (partial cell-mode "edit-mode"))
-(def display-mode (partial cell-mode "display-mode"))
-(def formula-mode (partial cell-mode "formula-mode"))
-(def source-mode  (partial cell-mode "source-mode"))
+(def edit-mode    (cell-mode "edit-mode"))
+(def display-mode (cell-mode "display-mode"))
+(def formula-mode (cell-mode "formula-mode"))
+(def source-mode  (cell-mode "source-mode"))
 
-(defn formula? [v] (string? (first (re-matches #"^=.*" v))))
+(defn formula? [v]
+  (string? (first (re-matches #"^=.*" v))))
 
 (defn behavior [message state]
   (println message "::" state)
   (match message
 
-    [[:display x y] :click _]
+    [[:display xy] :click _]
     (if (= (:mode state) :formula)
-      (let [formula (str (state (:focus state)) [x y])
-            [fx fy] (:focus state)]
-        [[(source-mode x y) [[:edit fx fy] :value formula]]
+      (let [formula (str (state (:focus state)) xy)]
+        [[(source-mode xy) [[:edit (:focus state)] :value formula]]
          (assoc state (:focus state) formula)])
-      [[(edit-mode x y)] state])
-
-    [[:edit x y] :focus? true]
-    [[] (assoc state :focus [x y])]
+      [[(edit-mode xy) (display-mode (:edit state))]
+       (assoc state :edit xy)])
     
-    [[:edit x y] :focus? false]
-    (if-not (= (:mode state) :formula)
-      [[(display-mode x y)] state]
-      [[] state])
+    [[:edit xy] :focus? true]
+    [[] (assoc state :focus xy)]
+    
+    [[:edit xy] :focus? false]
+    (if (= (:mode state) :formula)
+      [[] state]
+      [[(display-mode xy) [[:display xy] :value (state (:focus state))]]
+       (assoc state :mode :done)])
 
-    [[:edit x y] :value v]
+    [[:edit xy] :value v]
     (if (formula? v)
-      [[(formula-mode x y)] (assoc state :mode :formula [x y] v)]
-      [[] (-> (dissoc state :mode :formula) (assoc [x y] v))])
+      [[(formula-mode xy)] (assoc state :mode :formula xy v)]
+      [[] (assoc state :mode :value xy v)])
+
+    [[:edit xy] :key-down 13]
+    [[(display-mode xy) [[:display xy] :value (state (:focus state))]]
+     (assoc state :mode :done)]
     
     :else [[] state]))
 
 (defn cell [x y]
-  {:entity [:cell x y]
-   :render combo/div
-   :class "display-mode cell col-xs-2"
-   :units [{:entity [:display x y] :render combo/a     :on-key-down 13}
-           {:entity [:edit x y]    :render combo/input :type "text"}]})
+  (let [xy (str x y)]
+    {:entity [:cell xy]
+     :render combo/div
+     :class "display-mode cell col-xs-2"
+     :units [{:entity [:display xy]
+              :render combo/a}
+             {:entity [:edit xy]
+              :render combo/input
+              :type "text"
+              :capture-key-down #{13}}]}))
 
 (defn row [y width]
   {:entity [:row y]
    :render combo/div
    :class "row"
-   :units (map #(cell % y) [:a :b :c :d :e])})
+   :units (map #(cell % y) ["A" "B" "C" "D" "E" "F"])})
 
 (defn table []
   {:entity :table

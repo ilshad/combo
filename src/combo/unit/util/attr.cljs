@@ -44,7 +44,10 @@
 
 (defn onkey [owner spec]
   (merge {}
-    (when-let [k (:on-key-up spec)]
-      {:onKeyUp (event/key-code-return owner (:entity spec) :key-up k)})
-    (when-let [k (:on-key-down spec)]
-      {:onKeyDown (event/key-code-return owner (:entity spec) :key-down k)})))
+    (when (:return-key-up? spec)
+      {:onKeyUp (event/return-key-code owner (:entity spec) :key-up)})
+    (when (:return-key-down? spec)
+      {:onKeyDown (event/return-key-code owner (:entity spec) :key-down)})
+    (when-let [key-codes-set (:capture-key-down spec)]
+      {:onKeyDown (event/capture-key-codes owner (:entity spec) :key-down
+                    key-codes-set)})))
