@@ -1,5 +1,5 @@
-body {
-    font: 15px Consolas, 'Menlo', monospace;
+body, input {
+    font: 15px Consolas, 'Menlo', monospace !important;
 }
 
 .navbar {
@@ -32,6 +32,7 @@ body {
     line-height: 35px;
     padding: 6px 11px;
     line-height: 1.42;
+    color: #555;
 }
 
 .cell a:hover {
