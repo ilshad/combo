@@ -6,6 +6,22 @@
             [clojure.string :as string]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Helpers
+
+(defn- formula? [s]
+  (string? (first (re-matches #"^=.*" s))))
+
+(defn- write-formula [s state]
+  (let [formula (get-in state [:cells (:focus state) :formula])]
+    (str formula " " s)))
+
+(defn- cell-value [xy state]
+  (let [cell (get-in state [:cells xy])]
+    (if (:formula cell)
+      (read-formula (:formula cell) state)
+      (:value cell))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Formula interpreter
 
 (def ops {"/" / "*" * "+" + "-" -})
@@ -16,7 +32,7 @@
 (defn string->token [s env]
   (or (ops s)
       (let [n (js/parseInt s)]
-        (if (integer? n) n (resolve-var s env)))))
+        (if (integer? n) n (cell-value s env)))))
 
 (defn parse-formula [s env]
   (let [[_ a b c] (string/split s #" ")]
@@ -40,25 +56,10 @@
 (def source-mode  (cell-mode "source-mode"))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Helpers
-
-(defn- formula? [s]
-  (string? (first (re-matches #"^=.*" s))))
-
-(defn- write-formula [s state]
-  (let [formula (get-in state [:cells (:focus state) :formula])]
-    (str formula " " s)))
-
-(defn- cell-value [xy state]
-  (let [cell (get-in state [:cells xy])]
-    (if (:formula cell)
-      (read-formula (:formula cell) state)
-      (:value cell))))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; The Brain
 
 (defn behavior [message state]
+  (println message state)
   (match message
 
     [[:display xy] :click _]
@@ -97,7 +98,7 @@
     [[:edit xy] :key-down 13]
     [[(display-mode xy)
       (display-mode (:source state))
-      [[:display xy] :value (get-in state [:cells (:focus state) :value])]]
+      [[:display xy] :value (cell-value (:focus state) state)]]
      (assoc state :mode :done)]
     
     :else [[] state]))
