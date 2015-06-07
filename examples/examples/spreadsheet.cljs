@@ -8,15 +8,17 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Helpers
 
+(declare read-formula)
+
 (defn- formula? [s]
   (string? (first (re-matches #"^=.*" s))))
 
 (defn- write-formula [s state]
-  (let [formula (get-in state [:cells (:focus state) :formula])]
+  (let [formula (get-in state [(:focus state) :formula])]
     (str formula " " s)))
 
 (defn- cell-value [xy state]
-  (let [cell (get-in state [:cells xy])]
+  (let [cell (state xy)]
     (if (:formula cell)
       (read-formula (:formula cell) state)
       (:value cell))))
@@ -27,7 +29,7 @@
 (def ops {"/" / "*" * "+" + "-" -})
 
 (defn resolve-var [xy env]
-  (get-in env [:cells xy :value]))
+  (get-in env [xy :value]))
 
 (defn string->token [s env]
   (or (ops s)
@@ -63,16 +65,15 @@
   (match message
 
     [[:display xy] :click _]
-    (if (= (:mode state) :formula)
-      
+    (case (:mode state)
+
+      :formula
       (let [formula (write-formula xy state)]
         [[(source-mode xy)
           (display-mode (:source state))
           [[:edit (:focus state)] :value formula]]
-         (assoc state
-           (:focus state)
-           formula :source xy)])
-      
+         (assoc state :source xy (:focus state) {:formula formula})])
+
       [[(edit-mode xy)
         (display-mode (:edit state))]
        (assoc state :edit xy)])
@@ -81,19 +82,18 @@
     [[] (assoc state :focus xy)]
     
     [[:edit xy] :focus? false]
-    (if (= (:mode state) :formula)
-      [[] state]
+    (case (:mode state)
+
+      :formula [[] state]
+
       [[(display-mode xy)
         [[:display xy] :value (cell-value (:focus state) state)]]
        (assoc state :mode :done)])
 
     [[:edit xy] :value v]
     (if (formula? v)
-      [[(formula-mode xy)]
-       (-> (assoc state :mode :formula)
-           (assoc-in [:cells xy :formula] v))]
-      [[] (-> (assoc state :mode :value)
-              (assoc-in [:cells xy :value] v))])
+      [[(formula-mode xy)] (assoc state :mode :formula xy {:formula v})]
+      [[]                  (assoc state :mode :value   xy {:value   v})])
 
     [[:edit xy] :key-down 13]
     [[(display-mode xy)
