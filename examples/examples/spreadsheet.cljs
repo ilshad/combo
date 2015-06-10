@@ -5,46 +5,41 @@
             [om.core :as om :include-macros true]
             [clojure.string :as string]))
 
+(declare read-formula)
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Helpers
 
-(declare read-formula)
-
-(defn- formula? [s]
+(defn formula? [s]
   (string? (first (re-matches #"^=.*" s))))
 
-(defn- write-formula [s state]
-  (let [formula (get-in state [(:focus state) :formula])]
-    (str formula " " s)))
+(defn number [x]
+  (let [n (js/parseInt x)]
+    (when (integer? n) n)))
 
-(defn- cell-value [xy state]
+(defn cell-value [xy state]
   (let [cell (state xy)]
     (if (:formula cell)
       (read-formula (:formula cell) state)
-      (:value cell))))
+      ((some-fn number identity) (:value cell)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Formula interpreter
 
-(def ops {"/" / "*" * "+" + "-" -})
+(defn- tokenize-formula [s]
+  (rest (rest (string/split s #"(=|/|\*|\+|\-)"))))
 
-(defn resolve-var [xy env]
-  (get-in env [xy :value]))
+(defn- parse-formula [s env]
+  (for [x (tokenize-formula s)]
+    (or ({"/" / "*" * "+" + "-" -} x)
+        (number x)
+        (cell-value x env))))
 
-(defn string->token [s env]
-  (or (ops s)
-      (let [n (js/parseInt s)]
-        (if (integer? n) n (cell-value s env)))))
-
-(defn parse-formula [s env]
-  (let [[_ a b c] (string/split s #" ")]
-    (map #(string->token % env) (list b a c))))
-
-(defn eval-formula [tokens]
-  (apply (first tokens) (rest tokens)))
+(defn- infix [x & xs]
+  (reduce (fn [res [op y]] (op res y)) x (partition 2 xs)))
 
 (defn read-formula [s env]
-  (eval-formula (parse-formula s env)))
+  (apply infix (parse-formula s env)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Look and feel
@@ -58,17 +53,16 @@
 (def source-mode  (cell-mode "source-mode"))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; The Brain
+;; Logic
 
 (defn behavior [message state]
-  (println message state)
   (match message
 
     [[:display xy] :click _]
     (case (:mode state)
 
       :formula
-      (let [formula (write-formula xy state)]
+      (let [formula (str (get-in state [(:focus state) :formula]) xy)]
         [[(source-mode xy)
           (display-mode (:source state))
           [[:edit (:focus state)] :value formula]]
@@ -88,23 +82,21 @@
 
       [[(display-mode xy)
         [[:display xy] :value (cell-value (:focus state) state)]]
-       (assoc state :mode :done)])
+       (dissoc state :mode)])
 
     [[:edit xy] :value v]
     (if (formula? v)
       [[(formula-mode xy)] (assoc state :mode :formula xy {:formula v})]
-      [[]                  (assoc state :mode :value   xy {:value   v})])
+      [[] (assoc state :mode :value xy {:value v})])
 
     [[:edit xy] :key-down 13]
-    [[(display-mode xy)
-      (display-mode (:source state))
-      [[:display xy] :value (cell-value (:focus state) state)]]
-     (assoc state :mode :done)]
+    [[(display-mode xy) (display-mode (:source state))]
+     (dissoc state :mode :edit :source)]
     
     :else [[] state]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; The Spec
+;; Spec
 
 (defn cell [x y]
   (let [xy (str x y)]
