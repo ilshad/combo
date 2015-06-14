@@ -57,22 +57,38 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Behavior
 
-(defn- display-edited [state]
-  [[:display (:edit state)] :value
-   (gstring/format "%.2f" (cell-value (:focus state) state))])
+(defn- format-value [v]
+  (if (number? v) (gstring/format "%.2f" v) v))
+
+(defn- calculate [xy state]
+  [[:display xy] :value (format-value (cell-value xy state))])
+
+(defn- update-dependencies [xy state]
+  (map #(calculate % state)
+    (get-in state [:dependencies xy])))
 
 (defn- blur [state]
   (case (:mode state)
     :formula [[] state]
-    [[(display-mode (:edit state))
-      (display-edited state)]
+    [(into [(display-mode (:edit state))
+            (calculate (:focus state) state)]
+           (update-dependencies (:focus state) state))
      (dissoc state :source)]))
+
+(defn- edit [xy v state]
+  (if (formula? v)
+    [[(formula-mode xy)] (assoc state :mode :formula xy {:formula v})]
+    [[] (assoc state :mode :value xy {:value v})]))
 
 (defn- enter [state]
   [[(display-mode (:edit state))
     (display-mode (:source state))
-    (display-edited state)]
+    (calculate (:focus state) state)]
    (dissoc state :mode :edit :source)])
+
+(defn- add-dependency [xy]
+  (fn [deps]
+    (if (set? deps) (conj deps xy) #{xy})))
 
 (defn- click [xy state]
   (case (:mode state)
@@ -81,17 +97,13 @@
       [[(source-mode xy)
         (display-mode (:source state))
         [[:edit (:focus state)] :value formula]]
-       (assoc state :source xy (:focus state) {:formula formula})])
+       (-> (assoc state :source xy (:focus state) {:formula formula})
+           (update-in [:dependencies xy] (add-dependency (:edit state))))])
     [[(edit-mode xy)
       (display-mode (:edit state))]
      (assoc state :edit xy)]))
 
-(defn- edit [xy v state]
-  (if (formula? v)
-    [[(formula-mode xy)] (assoc state :mode :formula xy {:formula v})]
-    [[] (assoc state :mode :value xy {:value v})]))
-
-(defn- keydown-on-display [k state]
+(defn- keydown [k state]
   (case (:mode state)
     :formula
     (if (= k 13)
@@ -109,7 +121,7 @@
     [[:edit xy]    :value    v]     (edit xy v state)
     [[:edit _]     :key-down 13]    (enter state)
     [[:display xy] :click    _]     (click xy state)
-    [[:display _]  :key-down k]     (keydown-on-display k state)
+    [[:display _]  :key-down k]     (keydown k state)
     :else [[] state]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
