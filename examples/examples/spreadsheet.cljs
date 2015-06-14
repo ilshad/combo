@@ -38,7 +38,8 @@
         (cell-value x env))))
 
 (defn- infix [x & xs]
-  (reduce (fn [res [op y]] (op res y)) x (partition 2 xs)))
+  (reduce (fn [res [op y]] (op res y))
+    x (partition 2 xs)))
 
 (defn read-formula [s env]
   (apply infix (parse-formula s env)))
@@ -88,7 +89,9 @@
 
 (defn- add-dependency [xy]
   (fn [deps]
-    (if (set? deps) (conj deps xy) #{xy})))
+    (if (set? deps)
+      (conj deps xy)
+      #{xy})))
 
 (defn- click [xy state]
   (case (:mode state)
