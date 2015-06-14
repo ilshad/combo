@@ -46,7 +46,7 @@
       (om/build (screens (:screen app)) app))))
 
 (defn main []
-  (om/root root (atom {:screen :spreadsheet})
+  (om/root root (atom {:screen :about})
     {:target js/document.body}))
 
 (set! (.-onload js/window) main)

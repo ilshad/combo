@@ -81,3 +81,15 @@
   (comp (serve :dir "target")
         (cljs :optimizations :advanced)
         (wait)))
+
+;; Release
+
+(deftask clojars-snapshot []
+  (comp (build-jar) (push-snapshot)))
+
+(deftask clojars-release []
+  (comp (build-jar) (push-release)))
+
+(deftask gh-pages []
+  (examples-env!)
+  (cljs :optimizations :advanced))

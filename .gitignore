@@ -1,4 +1,6 @@
-/target
+/target/**
+!/target/main.js
+!/target/style.css
 /classes
 /checkouts
 pom.xml
@@ -7,3 +9,4 @@ pom.xml.asc
 *.class
 /.lein-*
 /.nrepl-port
+.DS_Store
