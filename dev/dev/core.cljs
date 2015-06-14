@@ -18,7 +18,14 @@
 (defn commit [args]
   (println "Received commit message from Combo:" (:message args)))
 
+(defn extern [return _]
+  (set! js/document.body.onkeydown
+    (fn [e]
+      (when (= e.target js/document.body)
+        (return [:extern/shortcut :keycode e.keyCode])))))
+
 (defn behavior [message state]
+  (println message state)
   (match message
 
     [:enable _ value]
@@ -44,6 +51,7 @@
 (defn view [data]
   (om/build combo/view data
     {:opts {:commit commit
+            :extern extern
             :behavior behavior
             :layout combo/bootstrap-layout
             :units [{:entity :group
@@ -95,7 +103,7 @@
          :city {:options {"" ""
                           "New York" "New York"
                           "London" "London"
-                          "Tolyo" "Tokyo"}}}))
+                          "Tokyo" "Tokyo"}}}))
 
 (defn main []
   (om/root root app-state {:target js/document.body}))

@@ -36,13 +36,25 @@
                  :message message}))
       (recur))))
 
+(defn- default-extern [return owner]
+  (when-let [c (om/get-state owner :extern-chan)]
+    (go-loop []
+      (return (async/<! c))
+      (recur))))
+
+(defn- setup-extern [owner spec]
+  (let [extern (:extern spec default-extern)
+        return (partial async/put! (om/get-state owner :return-chan))]
+    (extern return owner)))
+
 (defn- setup-behavior [owner spec]
   (let [behavior (:behavior spec (fn [_ s] [[] s]))
         return-chan (om/get-state owner :return-chan)
         update-chan (om/get-state owner :update-chan)]
     (go-loop [state {}]
       (let [[messages new-state] (behavior (async/<! return-chan) state)]
-        (doseq [m messages] (async/>! update-chan m))
+        (doseq [m messages]
+          (async/>! update-chan m))
         (recur new-state)))))
 
 (defn- unit-init-state [data spec]
@@ -126,7 +138,8 @@
     om/IWillMount
     (will-mount [_]
       (setup-commit data owner spec)
-      (setup-behavior owner spec))
+      (setup-extern      owner spec)
+      (setup-behavior    owner spec))
 
     om/IRender
     (render [_]

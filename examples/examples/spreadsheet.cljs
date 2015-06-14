@@ -53,52 +53,77 @@
 (def source-mode  (cell-mode "source-mode"))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Logic
+;; Behavior
+
+(defn- display-edited [state]
+  [[:display (:edit state)] :value (cell-value (:focus state) state)])
+
+(defn- blur [state]
+  (case (:mode state)
+    :formula [[] state]
+    [[(display-mode (:edit state))
+      (display-edited state)]
+     (dissoc state :source)]))
+
+(defn- enter [state]
+  [[(display-mode (:edit state))
+    (display-mode (:source state))
+    (display-edited state)]
+   (dissoc state :mode :edit :source)])
+
+(defn- click [xy state]
+  (case (:mode state)
+    :formula
+    (let [formula (str (get-in state [(:focus state) :formula]) xy)]
+      [[(source-mode xy)
+        (display-mode (:source state))
+        [[:edit (:focus state)] :value formula]]
+       (assoc state :source xy (:focus state) {:formula formula})])
+    [[(edit-mode xy)
+      (display-mode (:edit state))]
+     (assoc state :edit xy)]))
+
+(defn- edit [xy v state]
+  (if (formula? v)
+    [[(formula-mode xy)] (assoc state :mode :formula xy {:formula v})]
+    [[] (assoc state :mode :value xy {:value v})]))
+
+(defn- shortcut [k state]
+  (case (:mode state)
+    :formula
+    (if-let [op ({191 "/" 56 "*" 189 "-" 187 "+"} k)]
+      (let [xy (:edit state)
+            v (str (:formula (state xy)) op)]
+        [[[[:edit xy] :value v]] (assoc state xy {:formula v})])
+      (if (= k 13)
+        (enter state)
+        [[] state]))
+    [[] state]))
 
 (defn behavior [message state]
+  (println message state)
   (match message
-
-    [[:display xy] :click _]
-    (case (:mode state)
-
-      :formula
-      (let [formula (str (get-in state [(:focus state) :formula]) xy)]
-        [[(source-mode xy)
-          (display-mode (:source state))
-          [[:edit (:focus state)] :value formula]]
-         (assoc state :source xy (:focus state) {:formula formula})])
-
-      [[(edit-mode xy)
-        (display-mode (:edit state))]
-       (assoc state :edit xy)])
-    
-    [[:edit xy] :focus? true]
-    [[] (assoc state :focus xy)]
-    
-    [[:edit xy] :focus? false]
-    (case (:mode state)
-
-      :formula [[] state]
-
-      [[(display-mode xy)
-        [[:display xy] :value (cell-value (:focus state) state)]]
-       (dissoc state :mode)])
-
-    [[:edit xy] :value v]
-    (if (formula? v)
-      [[(formula-mode xy)] (assoc state :mode :formula xy {:formula v})]
-      [[] (assoc state :mode :value xy {:value v})])
-
-    [[:edit xy] :key-down 13]
-    [[(display-mode xy) (display-mode (:source state))]
-     (dissoc state :mode :edit :source)]
-    
+    [[:edit xy] :focus? true] [[] (assoc state :focus xy)]
+    [[:edit _] :focus? false] (blur state)
+    [[:edit xy] :value v]     (edit xy v state)
+    [[:edit _] :key-down 13]  (enter state)
+    [[:display xy] :click _]  (click xy state)
+    [:shortcut :key k]        (shortcut k state)
     :else [[] state]))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Extern
+
+(defn extern [return _]
+  (set! js/document.body.onkeydown
+    (fn [e]
+      (when (= e.target js/document.body)
+        (return [:shortcut :key e.keyCode])))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Spec
 
-(defn cell [x y]
+(defn- cell [x y]
   (let [xy (str x y)]
     {:entity [:cell xy]
      :render combo/div
@@ -110,7 +135,7 @@
               :type "text"
               :capture-key-down #{13}}]}))
 
-(defn row [y width]
+(defn- row [y width]
   {:entity [:row y]
    :render combo/div
    :class "row"
@@ -127,6 +152,7 @@
 (defn spreadsheet [app owner]
   (om/component
     (om/build combo/view nil
-      {:opts {:behavior behavior
+      {:opts {:extern extern
+              :behavior behavior
               :layout combo/bootstrap-layout
               :units [(table)]}})))
