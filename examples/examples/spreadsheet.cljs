@@ -3,7 +3,9 @@
             [cljs.core.match :refer-macros [match]]
             [om-tools.dom :as dom :include-macros true]
             [om.core :as om :include-macros true]
-            [clojure.string :as string]))
+            [clojure.string :as string]
+            [goog.string :as gstring]
+            [goog.string.format]))
 
 (declare read-formula)
 
@@ -56,7 +58,8 @@
 ;; Behavior
 
 (defn- display-edited [state]
-  [[:display (:edit state)] :value (cell-value (:focus state) state)])
+  [[:display (:edit state)] :value
+   (gstring/format "%.2f" (cell-value (:focus state) state))])
 
 (defn- blur [state]
   (case (:mode state)
@@ -88,37 +91,26 @@
     [[(formula-mode xy)] (assoc state :mode :formula xy {:formula v})]
     [[] (assoc state :mode :value xy {:value v})]))
 
-(defn- shortcut [k state]
+(defn- keydown-on-display [k state]
   (case (:mode state)
     :formula
-    (if-let [op ({191 "/" 56 "*" 189 "-" 187 "+"} k)]
-      (let [xy (:edit state)
+    (if (= k 13)
+      (enter state)
+      (let [op ({191 "/" 189 "-" 187 "+" 56 "*"} k)
+            xy (:edit state)
             v (str (:formula (state xy)) op)]
-        [[[[:edit xy] :value v]] (assoc state xy {:formula v})])
-      (if (= k 13)
-        (enter state)
-        [[] state]))
+        [[[[:edit xy] :value v]] (assoc state xy {:formula v})]))
     [[] state]))
 
 (defn behavior [message state]
-  (println message state)
   (match message
-    [[:edit xy] :focus? true] [[] (assoc state :focus xy)]
-    [[:edit _] :focus? false] (blur state)
-    [[:edit xy] :value v]     (edit xy v state)
-    [[:edit _] :key-down 13]  (enter state)
-    [[:display xy] :click _]  (click xy state)
-    [:shortcut :key k]        (shortcut k state)
+    [[:edit xy]    :focus?   true]  [[] (assoc state :focus xy)]
+    [[:edit _]     :focus?   false] (blur state)
+    [[:edit xy]    :value    v]     (edit xy v state)
+    [[:edit _]     :key-down 13]    (enter state)
+    [[:display xy] :click    _]     (click xy state)
+    [[:display _]  :key-down k]     (keydown-on-display k state)
     :else [[] state]))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Extern
-
-(defn extern [return _]
-  (set! js/document.body.onkeydown
-    (fn [e]
-      (when (= e.target js/document.body)
-        (return [:shortcut :key e.keyCode])))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Spec
@@ -129,6 +121,7 @@
      :render combo/div
      :class "display-mode cell col-xs-2"
      :units [{:entity [:display xy]
+              :capture-key-down #{191 189 187 56 13}
               :render combo/a}
              {:entity [:edit xy]
               :render combo/input
@@ -152,7 +145,6 @@
 (defn spreadsheet [app owner]
   (om/component
     (om/build combo/view nil
-      {:opts {:extern extern
-              :behavior behavior
+      {:opts {:behavior behavior
               :layout combo/bootstrap-layout
               :units [(table)]}})))

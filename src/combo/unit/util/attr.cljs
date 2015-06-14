@@ -49,5 +49,4 @@
     (when (:return-key-down? spec)
       {:onKeyDown (event/return-key-code owner (:entity spec) :key-down)})
     (when-let [key-codes-set (:capture-key-down spec)]
-      {:onKeyDown (event/capture-key-codes owner (:entity spec) :key-down
-                    key-codes-set)})))
+      {:onKeyDown (event/capture-key-codes owner (:entity spec) :key-down key-codes-set)})))
