@@ -63,7 +63,7 @@
       (om/build (screens (:screen app)) app))))
 
 (def init-data
-  {:screen :presentation
+  {:screen :about
    :slides (sorted-map 1 {:title "Foo"})})
 
 (defn main []

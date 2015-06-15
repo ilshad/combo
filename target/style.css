@@ -17,6 +17,10 @@ body, input {
     padding: 10px;
 }
 
+.no-padding {
+    padding: 0;
+}
+
 /**
  *
  * Spreadsheet
@@ -68,11 +72,12 @@ body, input {
 
 /**
  *
- * Word
+ * Editor
  *
  **/
 
 .workspace {
+    margin-top: 10px;
     background-color: #bbb;
     border: 1px solid #bbb;
     border-radius: 4px;
@@ -93,13 +98,40 @@ body, input {
     outline: none;
 }
 
-.clear {
-    height: 10px;
-    clear: both;
+/**
+ *
+ * Presentation
+ *
+ **/
+
+.thumbs {
+    margin-top: 10px;
+    height: 500px;
 }
 
-.feedback {
-    padding: 13px 0 0 10px;
-    color: orange;
-    font-weight: bold;
+.thumbs-inner {
+    background-color: #bbb;
+    border: 1px solid #bbb;
+    border-radius: 4px;
+    height: 500px;
+    overflow: auto;
+}
+
+.thumb {
+    background-color: white;
+    height: 70px;
+    margin: 5px;
+    padding: 5px;
+    border: 2px solid white;
+    border-radius: 2px;    
+    cursor: pointer;
+}
+
+.thumb.active {
+    border: 2px solid #555;
+}
+
+.presentation-workspace .canvas {
+    margin-top: 25px;
+    height: 450px;
 }
