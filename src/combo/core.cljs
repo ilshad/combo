@@ -12,8 +12,10 @@
 
 (def default-layout
   (reify ILayout
-    (render  [_ build spec] (apply dom/div nil (map build (:units spec))))
-    (control [_ spec] spec)))
+    (render [_ build spec]
+      (apply dom/div nil (map build (:units spec))))
+    (control [_ spec]
+      spec)))
 
 (defn- default-commit [{:keys [chan data owner message]}]
   (when chan
@@ -42,12 +44,12 @@
       (return (async/<! c))
       (recur))))
 
-(defn- setup-extern [owner spec]
+(defn- setup-extern [_ owner spec]
   (let [extern (:extern spec default-extern)
         return (partial async/put! (om/get-state owner :return-chan))]
     (extern return owner)))
 
-(defn- setup-behavior [owner spec]
+(defn- setup-behavior [data owner spec]
   (let [behavior (:behavior spec (fn [_ s] [[] s]))
         return-chan (om/get-state owner :return-chan)
         update-chan (om/get-state owner :update-chan)]
@@ -55,7 +57,8 @@
       (let [[messages new-state] (behavior (async/<! return-chan) state)]
         (doseq [m messages]
           (async/>! update-chan m))
-        (recur new-state)))))
+        (recur new-state)))
+    (async/put! return-chan [:combo/init :data data])))
 
 (defn- unit-init-state [data spec]
   (let [props #(select-keys % [:value :options :class :disabled])]
@@ -137,9 +140,9 @@
 
     om/IWillMount
     (will-mount [_]
-      (setup-commit data owner spec)
-      (setup-extern      owner spec)
-      (setup-behavior    owner spec))
+      (setup-commit   data owner spec)
+      (setup-extern   data owner spec)
+      (setup-behavior data owner spec))
 
     om/IRender
     (render [_]

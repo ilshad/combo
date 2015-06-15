@@ -118,7 +118,6 @@
     [[] state]))
 
 (defn behavior [message state]
-  (println message state)
   (match message
     [[:edit xy]    :focus?   true]  [[] (assoc state :focus xy)]
     [[:edit _]     :focus?   false] (blur state)
@@ -157,7 +156,7 @@
    :units (map row (range 10))})
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Public API
+;; Public
 
 (defn spreadsheet [app owner]
   (om/component
