@@ -4,8 +4,9 @@
             [combo.unit.util.event :as event]))
 
 (defn basic [owner spec]
-  {:id        (:id spec)
-   :className (om/get-state owner :class)})
+  (into {:id (:id spec)
+         :className (om/get-state owner :class)}
+    (:attrs spec)))
 
 (defn field [owner spec]
   {:name      (:name spec)
@@ -45,8 +46,18 @@
 (defn onkey [owner spec]
   (merge {}
     (when (:return-key-up? spec)
-      {:onKeyUp (event/return-key-code owner (:entity spec) :key-up)})
+      {:onKeyUp
+       (event/return-key-code
+         {:owner owner
+          :entity (:entity spec)
+          :attr :key-up
+          :filter-codes-set (:filter-key-down spec)
+          :capture-codes-set (:capture-key-up spec #{})})})
     (when (:return-key-down? spec)
-      {:onKeyDown (event/return-key-code owner (:entity spec) :key-down)})
-    (when-let [key-codes-set (:capture-key-down spec)]
-      {:onKeyDown (event/capture-key-codes owner (:entity spec) :key-down key-codes-set)})))
+      {:onKeyDown
+       (event/return-key-code
+         {:owner owner
+          :entity (:entity spec)
+          :attr :key-down
+          :filter-codes-set (:filter-key-down spec)
+          :capture-codes-set (:capture-key-down spec #{})})})))

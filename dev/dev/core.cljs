@@ -70,6 +70,7 @@
                                        :value "Clear"}]}]}
                     {:entity :city
                      :pretty? true
+                     :return-key-down? true
                      :capture-key-down #{13}
                      :render combo/select}
                     {:entity :enable

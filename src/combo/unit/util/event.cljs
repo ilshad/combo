@@ -12,16 +12,14 @@
     (async/put! (om/get-state owner :return-chan) [entity :focus? yes?])
     (.preventDefault e)))
 
-(defn return-key-code [owner entity attr]
+(defn return-key-code
+  [{:keys [owner entity attr filter-codes-set capture-codes-set]}]
   (fn [e]
-    (async/put! (om/get-state owner :return-chan)
-      [entity attr (.-keyCode e)])))
-
-(defn capture-key-codes [owner entity attr key-codes-set]
-  (fn [e]
-    (let [key-code (.-keyCode e)]
-      (when (key-codes-set key-code)
-        (async/put! (om/get-state owner :return-chan) [entity attr key-code])
+    (let [k (.-keyCode e)
+          return? (if filter-codes-set (filter-codes-set k) true)]
+      (when return?
+        (async/put! (om/get-state owner :return-chan) [entity attr k]))
+      (when (capture-codes-set k)
         (.preventDefault e)))))
 
 (defn event-keys [event]

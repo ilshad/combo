@@ -6,82 +6,83 @@
 (defn input [owner spec]
   (dom/input
     (clj->js
-      (merge (attr/basic owner spec)
-             (attr/onkey owner spec)
-             (attr/field owner spec)
+      (merge (attr/field owner spec)
              (attr/value owner spec)
-             (attr/input owner spec)))))
+             (attr/input owner spec)
+             (attr/onkey owner spec)
+             (attr/basic owner spec)))))
 
 (defn textarea [owner spec]
   (dom/textarea
     (clj->js
-      (merge (attr/basic owner spec)
+      (merge (attr/field owner spec)
+             (attr/value owner spec)
              (attr/onkey owner spec)
-             (attr/field owner spec)
-             (attr/value owner spec)))))
+             (attr/basic owner spec)))))
 
 (defn select [owner spec]
   (apply dom/select
     (clj->js
-      (merge (attr/basic owner spec)
+      (merge (attr/field owner spec)
+             (attr/value owner spec)
              (attr/onkey owner spec)
-             (attr/field owner spec)
-             (attr/value owner spec)))
+             (attr/basic owner spec)))
     (for [[k v] (om/get-state owner :options)]
       (dom/option #js {:value k} v))))
 
 (defn checkbox [owner spec]
   (dom/input
     (clj->js
-      (merge (attr/basic owner spec)
+      (merge (attr/field owner spec)
+             (attr/check owner spec)
              (attr/onkey owner spec)
-             (attr/field owner spec)
-             (attr/check owner spec)))))
+             (attr/basic owner spec)))))
 
 (defn button [owner spec]
   (dom/button
     (clj->js
-      (merge (attr/basic owner spec)
+      (merge (attr/field owner spec)
+             (attr/click owner spec)
              (attr/onkey owner spec)
-             (attr/field owner spec)
-             (attr/click owner spec)))
+             (attr/basic owner spec)))
     (om/get-state owner :value)))
 
 (defn form [owner spec units]
   (apply dom/form
     (clj->js
-      (merge (attr/basic owner spec)
+      (merge (attr/form  owner spec)
              (attr/onkey owner spec)
-             (attr/form  owner spec)))
+             (attr/basic owner spec)))
     units))
 
 (defn a [owner spec]
   (dom/a
     (clj->js
-      (merge (attr/basic owner spec)
+      (merge (attr/click owner spec)
              (attr/onkey owner spec)
-             (attr/click owner spec)
+             (attr/basic owner spec)
              {:href (:href spec "#")}))
     (om/get-state owner :value)))
 
 (defn span [owner spec]
   (dom/span
     (clj->js
-      (merge (attr/basic owner spec)
-             (attr/onkey owner spec)))
+      (merge (attr/onkey owner spec)
+             (attr/basic owner spec)))
     (om/get-state owner :value)))
 
 (defn div
   ([owner spec]
    (dom/div
      (clj->js
-       (merge (attr/basic owner spec)
-              (attr/onkey owner spec)))
+       (merge (attr/click owner spec)
+              (attr/onkey owner spec)
+              (attr/basic owner spec)))
      (om/get-state owner :value)))
 
   ([owner spec units]
    (apply dom/div
      (clj->js
-       (merge (attr/basic owner spec)
-              (attr/onkey owner spec)))
+       (merge (attr/onkey owner spec)
+              (attr/basic owner spec)))
      units)))

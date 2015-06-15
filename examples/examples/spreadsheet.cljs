@@ -118,6 +118,7 @@
     [[] state]))
 
 (defn behavior [message state]
+  (println message state)
   (match message
     [[:edit xy]    :focus?   true]  [[] (assoc state :focus xy)]
     [[:edit _]     :focus?   false] (blur state)
@@ -136,22 +137,23 @@
      :render combo/div
      :class "display-mode cell col-xs-2"
      :units [{:entity [:display xy]
+              :return-key-down? true
               :capture-key-down #{191 189 187 56 13}
               :render combo/a}
              {:entity [:edit xy]
               :render combo/input
               :type "text"
-              :capture-key-down #{13}}]}))
+              :return-key-down? true
+              :capture-key-down #{13}
+              :filter-key-down #{13}}]}))
 
-(defn- row [y width]
-  {:entity [:row y]
-   :render combo/div
+(defn- row [y]
+  {:render combo/div
    :class "row"
    :units (map #(cell % y) ["A" "B" "C" "D" "E"])})
 
-(defn table []
-  {:entity :table
-   :render combo/div
+(def table
+  {:render combo/div
    :units (map row (range 10))})
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -162,4 +164,4 @@
     (om/build combo/view nil
       {:opts {:behavior behavior
               :layout combo/bootstrap-layout
-              :units [(table)]}})))
+              :units [table]}})))

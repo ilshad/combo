@@ -13,6 +13,16 @@ body, input {
     color: #777;
 }
 
+.jumbotron {
+    padding: 10px;
+}
+
+/**
+ *
+ * Spreadsheet
+ *
+ **/
+
 .cell {
     padding: 0;
     border: 1px solid #ddd;
@@ -55,3 +65,41 @@ body, input {
 .cell.formula-mode input { display: block; }
 .cell.display-mode input { display: none; }
 .cell.source-mode  input { display: none; }
+
+/**
+ *
+ * Word
+ *
+ **/
+
+.workspace {
+    background-color: #bbb;
+    border: 1px solid #bbb;
+    border-radius: 4px;
+    height: 500px;
+    overflow: auto;
+}
+
+.canvas {
+    display: block;
+    width: 600px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    margin-right: auto;
+    margin-left: auto;
+    padding: 20px 50px;
+    height: 600px;
+    background-color: white;
+    outline: none;
+}
+
+.clear {
+    height: 10px;
+    clear: both;
+}
+
+.feedback {
+    padding: 13px 0 0 10px;
+    color: orange;
+    font-weight: bold;
+}
