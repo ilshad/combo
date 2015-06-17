@@ -18,8 +18,7 @@
   {:content (str (rand-int 256))})
 
 (defn- page->thumb [page id]
-  (-> (select-keys page [:content])
-      (assoc :id id)))
+  {:id id :content (apply str (take 100 (:content page)))})
 
 (defn- thumbs-message [state]
   [:thumbs :items (map page->thumb (:pages state) (range))])
@@ -52,17 +51,29 @@
        (assoc state :active new-id)])
     [[] state]))
 
+(defn- canvas-content []
+  (.-innerHTML (.getElementById js/document "canvas")))
+
+(defn- save-page-state [state]
+  (update-in state [:pages]
+    (fn [pages]
+      (assoc pages (:active state) {:content (canvas-content)}))))
+
+(defn- save-page [state]
+  (let [state (save-page-state state)]
+    [[(thumbs-message state)] state]))
+
 (defn- text [k state]
   (.execCommand js/document (name k))
   [[] state])
 
 (defn behavior [message state]
-  (println message state)
   (match message
     [:combo/init   _ _] (init)
     [:thumbs :click id] (select-page id state)
     [[:page :add]  _ _] (add-page state)
     [[:page :del]  _ _] (del-page state)
+    [[:page :save] _ _] (save-page state)
     [[:text k]     _ _] (text k state)
     :else [[] state]))
 
@@ -79,15 +90,24 @@
                   :on-click (fn [e]
                               (async/put! (om/get-state owner :return-chan)
                                 [:thumbs :click (:id i)])
-                              (.preventDefault e))}
-          (:content i))))))
+                              (.preventDefault e))
+                  :dangerouslySetInnerHTML #js {:__html (:content i)}})))))
+
+(defn render-canvas [owner _]
+  (dom/div {:class "workspace col-xs-10"}
+    (dom/div {:id "canvas"
+              :class "canvas"
+              :contentEditable ""
+              :dangerouslySetInnerHTML
+              #js {:__html (om/get-state owner :value)}})))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Spec
 
 (def page-actions
-  [[[:page :add] "plus"]
-   [[:page :del] "trash"]])
+  [[[:page :add]  "plus"]
+   [[:page :save] "save"]
+   [[:page :del]  "trash"]])
 
 (def workspace-actions
   [[[:text :bold]          "bold"]
@@ -106,31 +126,6 @@
    :render combo/button
    :value (dom/i {:class (str "fa fa-" icon)})})
 
-(def toolbar
-  {:render combo/div
-   :class "row"
-   :units [{:render combo/div
-            :class "btn-group col-xs-2"
-            :units (map button page-actions)}
-           {:render combo/div
-            :class "btn-group col-xs-4 no-padding"
-            :units (map button workspace-actions)}
-           {:render combo/div
-            :class "btn-group col-xs-1"
-            :units (map button presentation-actions)}]})
-
-(def thumbs
-  {:entity :thumbs
-   :render render-thumbs})
-
-(def workspace
-  {:render combo/div
-   :class "workspace presentation-workspace col-xs-10"
-   :units [{:entity :canvas
-            :render combo/div
-            :class "canvas"
-            :attrs {:contentEditable ""}}]})
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Public
 
@@ -139,7 +134,20 @@
     (om/build combo/view nil
       {:opts {:behavior behavior
               :layout combo/bootstrap-layout
-              :units [toolbar
+              :units [{:render combo/div
+                       :class "row"
+                       :units [{:render combo/div
+                                :class "btn-group col-xs-2"
+                                :units (map button page-actions)}
+                               {:render combo/div
+                                :class "btn-group col-xs-4 no-padding"
+                                :units (map button workspace-actions)}
+                               {:render combo/div
+                                :class "btn-group col-xs-1"
+                                :units (map button presentation-actions)}]}
                       {:render combo/div
                        :class "row"
-                       :units [thumbs workspace]}]}})))
+                       :units [{:entity :thumbs
+                                :render render-thumbs}
+                               {:entity :canvas
+                                :render render-canvas}]}]}})))

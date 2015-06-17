@@ -72,7 +72,7 @@ body, input {
 
 /**
  *
- * Editor
+ * Presentation
  *
  **/
 
@@ -88,7 +88,8 @@ body, input {
 .canvas {
     display: block;
     width: 600px;
-    margin-top: 5px;
+    height: 450px;
+    margin-top: 25px;
     margin-bottom: 5px;
     margin-right: auto;
     margin-left: auto;
@@ -97,12 +98,6 @@ body, input {
     background-color: white;
     outline: none;
 }
-
-/**
- *
- * Presentation
- *
- **/
 
 .thumbs {
     margin-top: 10px;
@@ -125,13 +120,9 @@ body, input {
     border: 2px solid white;
     border-radius: 2px;    
     cursor: pointer;
+    font-size: 30%;
 }
 
 .thumb.active {
     border: 2px solid #555;
-}
-
-.presentation-workspace .canvas {
-    margin-top: 25px;
-    height: 450px;
 }

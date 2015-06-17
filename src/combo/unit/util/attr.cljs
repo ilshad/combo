@@ -6,7 +6,8 @@
 (defn basic [owner spec]
   (into {:id (:id spec)
          :className (om/get-state owner :class)}
-    (:attrs spec)))
+    (when-let [attrs (:attrs spec)]
+      (attrs owner))))
 
 (defn field [owner spec]
   {:name      (:name spec)
