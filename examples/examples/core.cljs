@@ -62,12 +62,8 @@
       (navbar app)
       (om/build (screens (:screen app)) app))))
 
-(def init-data
-  {:screen :about
-   :slides (sorted-map 1 {:title "Foo"})})
-
 (defn main []
-  (om/root root (atom init-data)
+  (om/root root (atom {:screen :presentation})
     {:target js/document.body}))
 
 (set! (.-onload js/window) main)

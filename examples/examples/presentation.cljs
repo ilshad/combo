@@ -1,64 +1,93 @@
 (ns examples.presentation
   (:require [combo.api :as combo]
+            [cljs.core.async :as async]
             [cljs.core.match :refer-macros [match]]
             [om-tools.dom :as dom :include-macros true]
             [om.core :as om :include-macros true]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Commit
+;; Utils
 
-(defn commit [{:keys [message data] :as args}]
-  (println "commit:" args)
-  (match message
-    [_ :add [id content]]
-    (om/transact! data [:slides] #(assoc % id {:content content}))
-    [_ :del id]
-    (om/transact! data [:slides] #(dissoc % id))))
+(defn- remove-from-vector [v pos]
+  (vec (concat (subvec v 0 pos) (subvec v (inc pos) (count v)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Behavior
+
+(defn- new-page []
+  {:content (str (rand-int 256))})
+
+(defn- page->thumb [page id]
+  (-> (select-keys page [:content])
+      (assoc :id id)))
+
+(defn- thumbs-message [state]
+  [:thumbs :items (map page->thumb (:pages state) (range))])
+
+(defn- select-page-messages [id state]
+  [[:canvas :value (if (nil? id) "" (:content ((:pages state) id)))]
+   [:thumbs :active id]])
+
+(defn- init []
+  (let [state {:pages [(new-page)] :active 0}]
+    [(cons (thumbs-message state) (select-page-messages 0 state))
+     state]))
+
+(defn- select-page [id state]
+  (let [state (assoc state :active id)]
+    [(select-page-messages id state) state]))
+
+(defn- add-page [state]
+  (let [state (update-in state [:pages] #(conj % (new-page)))
+        id (dec (count (:pages state)))]
+    [(cons (thumbs-message state) (select-page-messages id state))
+     (assoc state :active id)]))
+
+(defn- del-page [state]
+  (if (> (count (:pages state)) 1)
+    (let [id (:active state)
+          state (update-in state [:pages] #(remove-from-vector % id))
+          new-id (dec (count (:pages state)))]
+      [(cons (thumbs-message state) (select-page-messages new-id state))
+       (assoc state :active new-id)])
+    [[] state]))
 
 (defn- text [k state]
   (.execCommand js/document (name k))
   [[] state])
 
-(defn- add-slide [state]
-  (let [id (inc (:active state 1))
-        content (str "Slide #" (rand-int 256))]
-    [[[:combo/commit :add [id content]]]
-     (assoc state id {:content content} :active id)]))
-
-(defn- del-slide [state]
-  [[[:combo/commit :del (:active state)]] state])
-
-(defn- show-slide [id state]
-  (let [content (-> state :active state :content)]
-    (println "content is:" content)
-    [[[[:thumb id] :class "thumb active"]
-      [[:thumb (:active state)] :class "thumb"]
-      [:canvas :value content]]
-     (assoc state :active id)]))
-
 (defn behavior [message state]
   (println message state)
   (match message
+    [:combo/init   _ _] (init)
+    [:thumbs :click id] (select-page id state)
+    [[:page :add]  _ _] (add-page state)
+    [[:page :del]  _ _] (del-page state)
     [[:text k]     _ _] (text k state)
-    [[:slide :add] _ _] (add-slide state)
-    [[:slide :del] _ _] (del-slide state)
-    [[:thumb id]   _ _] (show-slide id state)
     :else [[] state]))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Render
+
+(defn render-thumbs [owner _]
+  (dom/div {:class "thumbs col-xs-2"}
+    (dom/div {:class "thumbs-inner"}
+      (for [i (om/get-state owner :items)]
+        (dom/div {:class (str "thumb"
+                           (when (= (:id i) (om/get-state owner :active))
+                             " active"))
+                  :on-click (fn [e]
+                              (async/put! (om/get-state owner :return-chan)
+                                [:thumbs :click (:id i)])
+                              (.preventDefault e))}
+          (:content i))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Spec
 
-(defn button [[entity icon]]
-  {:entity entity
-   :render combo/button
-   :value (dom/i {:class (str "fa fa-" icon)})})
-
-(def slide-actions
-  [[[:slide :add] "plus"]
-   [[:slide :del] "trash"]])
+(def page-actions
+  [[[:page :add] "plus"]
+   [[:page :del] "trash"]])
 
 (def workspace-actions
   [[[:text :bold]          "bold"]
@@ -72,12 +101,17 @@
 (def presentation-actions
   [[[:presentation :play] "play"]])
 
+(defn button [[entity icon]]
+  {:entity entity
+   :render combo/button
+   :value (dom/i {:class (str "fa fa-" icon)})})
+
 (def toolbar
   {:render combo/div
    :class "row"
    :units [{:render combo/div
             :class "btn-group col-xs-2"
-            :units (map button slide-actions)}
+            :units (map button page-actions)}
            {:render combo/div
             :class "btn-group col-xs-4 no-padding"
             :units (map button workspace-actions)}
@@ -85,18 +119,9 @@
             :class "btn-group col-xs-1"
             :units (map button presentation-actions)}]})
 
-(defn thumb [[id slide]]
-  {:render combo/div
-   :entity [:thumb id]
-   :class "thumb"
-   :value id})
-
-(defn thumbs [slides]
-  {:render combo/div
-   :class "thumbs col-xs-2"
-   :units [{:render combo/div
-            :class "thumbs-inner"
-            :units (map thumb slides)}]})
+(def thumbs
+  {:entity :thumbs
+   :render render-thumbs})
 
 (def workspace
   {:render combo/div
@@ -111,12 +136,10 @@
 
 (defn presentation [app owner]
   (om/component
-    (om/build combo/view app
-      {:opts {:commit commit
-              :behavior behavior
+    (om/build combo/view nil
+      {:opts {:behavior behavior
               :layout combo/bootstrap-layout
               :units [toolbar
                       {:render combo/div
                        :class "row"
-                       :units [(thumbs (:slides app))
-                               workspace]}]}})))
+                       :units [thumbs workspace]}]}})))

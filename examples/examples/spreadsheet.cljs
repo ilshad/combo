@@ -10,7 +10,7 @@
 (declare read-formula)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Helpers
+;; Utils
 
 (defn formula? [s]
   (string? (first (re-matches #"^=.*" s))))
@@ -65,8 +65,7 @@
   [[:display xy] :value (format-value (cell-value xy state))])
 
 (defn- update-dependencies [xy state]
-  (map #(calculate % state)
-    (get-in state [:dependencies xy])))
+  (map #(calculate % state) (get-in state [:dependencies xy])))
 
 (defn- blur [state]
   (case (:mode state)
