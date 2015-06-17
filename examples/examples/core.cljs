@@ -2,8 +2,7 @@
   (:require [om.core :as om :include-macros true]
             [om-tools.dom :as dom :include-macros true]
             [examples.presentation :as presentation]
-            [examples.spreadsheet :as spreadsheet]
-            [examples.editor :as editor]))
+            [examples.spreadsheet :as spreadsheet]))
 
 (enable-console-print!)
 
@@ -22,14 +21,11 @@
         (dom/ul
           (dom/li (combo-link "Combo home page"))
           (dom/li
-            (dom/a {:href "https://github.com/ilshad/combo/blob/master/examples/examples/spreadsheet.cljs" :target "_blank"}
-              "Spreadsheet source code"))
-          (dom/li
-            (dom/a {:href "https://github.com/ilshad/combo/blob/master/examples/examples/editor.cljs" :target "_blank"}
-              "Editor source code"))
-          (dom/li
             (dom/a {:href "https://github.com/ilshad/combo/blob/master/examples/examples/presentation.cljs" :target "_blank"}
-              "Presentation source code")))))))
+              "Presentation source code"))
+          (dom/li
+            (dom/a {:href "https://github.com/ilshad/combo/blob/master/examples/examples/spreadsheet.cljs" :target "_blank"}
+              "Spreadsheet source code")))))))
 
 (defn menu-item [app screen title]
   (dom/li {:class (when (= (:screen app) screen) "active")}
@@ -45,16 +41,14 @@
       (dom/span {:class "navbar-brand"}
         "Combo Examples")
       (dom/ul {:class "nav navbar-nav nav-pills"}
-        (menu-item app :about "About")
-        (menu-item app :spreadsheet "Spreadsheet")
-        (menu-item app :editor "Editor")
-        (menu-item app :presentation "Presentation")))))
+        (menu-item app :about        "About")
+        (menu-item app :presentation "Presentation")
+        (menu-item app :spreadsheet  "Spreadsheet")))))
 
 (def screens
-  {:about about
-   :spreadsheet spreadsheet/spreadsheet
-   :editor editor/editor
-   :presentation presentation/presentation})
+  {:about        about
+   :presentation presentation/presentation
+   :spreadsheet  spreadsheet/spreadsheet})
 
 (defn root [app owner]
   (om/component
@@ -63,7 +57,7 @@
       (om/build (screens (:screen app)) app))))
 
 (defn main []
-  (om/root root (atom {:screen :presentation})
+  (om/root root (atom {:screen :about})
     {:target js/document.body}))
 
 (set! (.-onload js/window) main)
