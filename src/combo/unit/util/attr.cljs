@@ -7,7 +7,7 @@
   (into {:id (:id spec)
          :className (om/get-state owner :class)}
     (when-let [attrs (:attrs spec)]
-      (attrs owner))))
+      (attrs owner spec))))
 
 (defn field [owner spec]
   {:name      (:name spec)

@@ -32,31 +32,6 @@
 
 (bootlaces! +version+)
 
-;; Examples
-
-(defn examples-env! []
-  (merge-env!
-    :source-paths #{"examples"}
-    :resource-paths #{"examples"}
-    :dependencies '[[org.clojure/core.match "0.3.0-alpha4"]
-                    [prismatic/om-tools "0.3.10"]]))
-
-(deftask examples []
-  (examples-env!)
-  (comp (serve :dir "target")
-        (watch)
-        (reload :on-jsload 'examples.core/main)
-        (cljs-repl)
-        (cljs :optimizations :none
-              :source-map    true
-              :unified-mode  true)))
-
-(deftask examples-advanced []
-  (examples-env!)
-  (comp (serve :dir "target")
-        (cljs :optimizations :advanced)
-        (wait)))
-
 ;; Development
 
 (defn dev-env! []
@@ -82,6 +57,25 @@
         (cljs :optimizations :advanced)
         (wait)))
 
+;; Demo
+
+(defn demo-env! []
+  (merge-env!
+    :source-paths #{"demo"}
+    :resource-paths #{"demo"}
+    :dependencies '[[org.clojure/core.match "0.3.0-alpha4"]
+                    [prismatic/om-tools "0.3.10"]]))
+
+(deftask demo []
+  (demo-env!)
+  (comp (serve :dir "target")
+        (watch)
+        (reload :on-jsload 'combo-demo.core/main)
+        (cljs-repl)
+        (cljs :optimizations :none
+              :source-map    true
+              :unified-mode  true)))
+
 ;; Release
 
 (deftask clojars-snapshot []
@@ -91,5 +85,5 @@
   (comp (build-jar) (push-release)))
 
 (deftask gh-pages []
-  (examples-env!)
+  (demo-env!)
   (cljs :optimizations :advanced))

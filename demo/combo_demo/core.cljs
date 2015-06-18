@@ -1,8 +1,8 @@
-(ns examples.core
+(ns combo-demo.core
   (:require [om.core :as om :include-macros true]
             [om-tools.dom :as dom :include-macros true]
-            [examples.presentation :as presentation]
-            [examples.spreadsheet :as spreadsheet]))
+            [combo-demo.presentation :as presentation]
+            [combo-demo.spreadsheet :as spreadsheet]))
 
 (enable-console-print!)
 
@@ -14,18 +14,17 @@
   (om/component
     (dom/div
       (dom/p {:class "jumbotron"}
-        "Here are examples of components built with " (combo-link "Combo")
-        ". Please note that they are tested in Google Chrome.")
+        "This demo app contains example components built with "
+        (combo-link "Combo") ". They work properly in Chrome browser.")
       (dom/p
-        (dom/h4 "Links:")
         (dom/ul
           (dom/li (combo-link "Combo home page"))
           (dom/li
-            (dom/a {:href "https://github.com/ilshad/combo/blob/master/examples/examples/presentation.cljs" :target "_blank"}
-              "Presentation source code"))
+            (dom/a {:href "https://github.com/ilshad/combo/blob/master/demo/combo_demo/presentation.cljs" :target "_blank"}
+              "Presentation sources"))
           (dom/li
-            (dom/a {:href "https://github.com/ilshad/combo/blob/master/examples/examples/spreadsheet.cljs" :target "_blank"}
-              "Spreadsheet source code")))))))
+            (dom/a {:href "https://github.com/ilshad/combo/blob/master/demo/combo_demo/spreadsheet.cljs" :target "_blank"}
+              "Spreadsheet sources")))))))
 
 (defn menu-item [app screen title]
   (dom/li {:class (when (= (:screen app) screen) "active")}
@@ -39,7 +38,7 @@
   (dom/div {:class "navbar"}
     (dom/div {:class "navbar-header"}
       (dom/span {:class "navbar-brand"}
-        "Combo Examples")
+        "Combo Demo")
       (dom/ul {:class "nav navbar-nav nav-pills"}
         (menu-item app :about        "About")
         (menu-item app :presentation "Presentation")

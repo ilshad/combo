@@ -1,4 +1,4 @@
-(ns examples.spreadsheet
+(ns combo-demo.spreadsheet
   (:require [combo.api :as combo]
             [cljs.core.match :refer-macros [match]]
             [om-tools.dom :as dom :include-macros true]

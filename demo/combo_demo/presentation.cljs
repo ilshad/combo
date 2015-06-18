@@ -1,4 +1,4 @@
-(ns examples.presentation
+(ns combo-demo.presentation
   (:require [combo.api :as combo]
             [cljs.core.async :as async]
             [cljs.core.match :refer-macros [match]]
