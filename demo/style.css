@@ -87,16 +87,15 @@ body, input {
 
 .canvas {
     display: block;
-    width: 600px;
-    height: 450px;
-    margin-top: 25px;
-    margin-bottom: 5px;
+    width: 676px;
+    height: 480px;
+    margin-top: 10px;
     margin-right: auto;
     margin-left: auto;
     padding: 20px 50px;
-    height: 600px;
     background-color: white;
     outline: none;
+    font-size: 200%;
 }
 
 .thumbs {

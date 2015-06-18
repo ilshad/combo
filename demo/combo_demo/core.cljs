@@ -41,13 +41,13 @@
         "Combo Demo")
       (dom/ul {:class "nav navbar-nav nav-pills"}
         (menu-item app :about        "About")
-        (menu-item app :presentation "Presentation")
-        (menu-item app :spreadsheet  "Spreadsheet")))))
+        (menu-item app :spreadsheet  "Spreadsheet")
+        (menu-item app :presentation "Presentation")))))
 
 (def screens
   {:about        about
-   :presentation presentation/presentation
-   :spreadsheet  spreadsheet/spreadsheet})
+   :spreadsheet  spreadsheet/spreadsheet
+   :presentation presentation/presentation})
 
 (defn root [app owner]
   (om/component
