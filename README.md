@@ -35,10 +35,11 @@ Om-based code.
 
 However, it is possible to write entire applications with Combo. For
 example, [Demo](http://ilshad.com/combo) includes simple
-Spreadsheet (~120 LOC)  and Presentation tool (~130 LOC). Perhaps,
-sometimes single Combo component is enaugh to build entire
-application and perphaps, sometimes it is pretty expressive code to
-describe logic and UI.
+Spreadsheet (~120 LOC)  and Presentation Tool (~130 LOC). Perhaps,
+sometimes even a single Combo component is enough to build an entire
+application. Perphaps, sometimes it is pretty expressive code to
+describe user interfaces with complex logic and multi-directional
+relations between widgets.
 
 Combo provides single entry point, `combo.api/view`, which is just
 Om component. All required things (see below) should be passed into
@@ -60,6 +61,8 @@ multidirectional control flow;
 
 - need for generate UI from data-driven DSL (for example, generate
 DSL for UI from another high-level DSL).
+
+_(documentation is not accomplished)_
 
 ## License
 

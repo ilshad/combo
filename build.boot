@@ -3,7 +3,7 @@
 (task-options!
   pom {:project     'combo
        :version     +version+
-       :description ""
+       :description "state/event driven component for Om"
        :url         "https://github.com/ilshad/combo"
        :scm         {:url "https://github.com/ilshad/combo"}
        :license     {"Eclipse Public License"
