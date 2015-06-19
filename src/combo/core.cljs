@@ -51,9 +51,11 @@
 
 (defn- wrap-debug [spec behavior]
   (fn [message state]
-    (when (:debug? spec) (println "<<" message " :: " state))
+    (when (:debug? spec)
+      (println "<<" message " :: " state))
     (let [[messages new-state] (behavior message state)]
-      (when (:debug? spec) (println "=>" messages " :: " new-state))
+      (when (:debug? spec)
+        (println "=>" messages " :: " new-state))
       [messages new-state])))
 
 (defn- debug-behavior [messages state spec]

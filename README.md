@@ -27,11 +27,11 @@ flow by pure functions which transform simple data structures:
 Behavior :: Message, State -> [Message], State
 ```
 
-Combo provides single entry point, `combo.api/view`. We call it `combo
-component`. This is Om component. Also, there are nested Om components,
-managed by Combo. We call them `combo units` and we describe them in
-a data-DSL as input for combo component. All required things (see detailed
-documentation) should be passed into `opts` for `om/build`:
+Combo provides single entry point, `combo.api/view` which is just Om
+component. Also, there are nested Om components, managed by Combo.
+We call them `units` and describe them in a DSL-as-data as input for
+combo. All required things (see detailed documentation) should be
+passed into `opts` for `om/build`:
 
 ```clojure
 (require '[combo.api :as combo])
@@ -43,7 +43,7 @@ documentation) should be passed into `opts` for `om/build`:
 
 _Combo is not a general-purpose ClojureScript framework._ It is
 library for writing _some_ of your components (likely they are rather
-complex ones) by _another, special way_: data-DSL for
+complex ones) by _another, special way_: DSL-as-data for
 layout and state/event function for behavior. It is intended to be
 used within Om-based application along with other, more idiomatic
 Om-based code.
@@ -53,41 +53,44 @@ Om-based code.
 However, it is possible to write entire applications with Combo. For
 example, [Demo](http://ilshad.com/combo) includes simple
 Spreadsheet  and Presentation apps. Perhaps, sometimes even a single
-Combo component is enough to build an entire application. Perphaps,
+combo/view is enough to build an entire application. Perphaps,
 sometimes it is pretty expressive code to describe user interfaces
 with complex logic.
 
 Possible use cases for Combo:
 
 - multiple tangled relations between UI widgets
-
-- need for data-DSL (maybe, generate DSL for UI from another high-level DSL).
+- need for DSL-as-data (maybe, generate DSL for UI from another high-level DSL).
 
 ## Drawbacks
 
 Take a look at the [Demo](http://ilshad.com/combo). In order to create
-50 cells, Spreadsheet app mounts 161 Om/React components (50 for
-cell containers, 50 for display div, 50 for input field, 10 for rows,
-and 1 for table). Each one requires to initialize a couple of
+50 cells, Spreadsheet app mounts 161 Om components (50 for
+`:cell` containers, 50 for `:display` div, 50 for `:edit` input field,
+10 for rows, and 1 for table). Each one requires to initialize a couple of
 core.async channels, go-routines, etc. The result is some delay while
 opening Spreadsheet. This is because we do not write render functions
 at all. Instead, we are combining dynamically generating units based
 on built-in render functions.
 
 As an alternative solution, do not create so many units, but write
-custom render functions. We can see an example in Presentation demo
-app: instead of dynamically generating unit for each slide thumbnail,
-we have defined unit `:thumbs` and special render function for
-this. The total number of units in Presentation app is 18: we create
-unit for each button in the toolbar. Possible alternative, for example,
-is to create single unit for toolbar with custom render function.
+custom render functions. In the Spreadsheet app, we could write render
+function for cell. The result is 61 Om components instead of 161.
+
+We can see an example in Presentation demo app: instead of dynamically
+generating unit for each slide thumbnail, we have defined unit
+`:thumbs` and special render function for this. The total number of
+units in Presentation app is 18: we create unit for each button in the
+toolbar. Possible alternative, for example, is to create single unit
+for toolbar with custom render function.
 
 Actually, there are always number of options of how to structure Combo
-component:
+view:
 
-- more units based on build-in (very basic) render functions
+- more units based on build-in render functions
 - or less units based on custom render functions;
-- define entire Combo component structure by units
+
+- define entire Combo look & feel by units
 - or define layout to wrap rendering in some generic way.
 
 ## Main concepts
@@ -97,10 +100,9 @@ There are two main ideas in Combo:
 - units
 - behavior
 
-Units define the structure of the component (they are actually nested Om
-components, managed by Combo). They contain render functions.
-Developers write render functions or they use basic render functions
-from Combo API.
+Units define the structure of the combo. They contain render functions.
+Developers write render functions or use basic render functions from
+Combo API.
 
 Behavior defines how to manage relations between units.
 
