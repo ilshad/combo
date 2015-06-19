@@ -19,8 +19,8 @@ state and returns sequence of messages and new state:
 All computations happen here. Instead of tangled wires of core.async
 channels streched between nested components, go-routines, local
 states, etc., developers describe entire UI logic in terms of messages
-and state machine and manage it in a single place with unidirectional
-flow, with pure functions which transform simple data structures:
+and state machine and they manage it in a single place with unidirectional
+flow by pure functions which transform simple data structures:
 
 
 ```
@@ -28,7 +28,7 @@ Behavior :: Message, State -> [Message], State
 ```
 
 Combo provides single entry point, `combo.api/view`. We call it `combo
-component`. And it is Om/ReactJS component. Also, there are nested Om components,
+component`. This is Om component. Also, there are nested Om components,
 managed by Combo. We call them `combo units` and we describe them in
 a data-DSL as input for combo component. All required things (see detailed
 documentation) should be passed into `opts` for `om/build`:
@@ -55,7 +55,7 @@ example, [Demo](http://ilshad.com/combo) includes simple
 Spreadsheet  and Presentation apps. Perhaps, sometimes even a single
 Combo component is enough to build an entire application. Perphaps,
 sometimes it is pretty expressive code to describe user interfaces
-with complex logic and multi-directional relations between widgets.
+with complex logic.
 
 Possible use cases for Combo:
 
@@ -70,23 +70,25 @@ Take a look at the [Demo](http://ilshad.com/combo). In order to create
 cell containers, 50 for display div, 50 for input field, 10 for rows,
 and 1 for table). Each one requires to initialize a couple of
 core.async channels, go-routines, etc. The result is some delay while
-opening Spreadsheet. We do not write render functions at all. Instead, we are
-combining dynamically generating units based on built-in render functions.
+opening Spreadsheet. This is because we do not write render functions
+at all. Instead, we are combining dynamically generating units based
+on built-in render functions.
 
-As an alternative solution, do not create so many units, but write custom render
-functions. We can see an example in Presentation demo app: instead
-of dynamically generating unit for each slide thumbnail, we have
-defined unit :thumbs and special render function for this. The total
-number of units in Presentation app is 18: we create unit for each
-button in the toolbar. Possible alternative, for example, is to create
-single unit for toolbar with custom render function which will send
-buttons-related messages to the behavior.
+As an alternative solution, do not create so many units, but write
+custom render functions. We can see an example in Presentation demo
+app: instead of dynamically generating unit for each slide thumbnail,
+we have defined unit `:thumbs` and special render function for
+this. The total number of units in Presentation app is 18: we create
+unit for each button in the toolbar. Possible alternative, for example,
+is to create single unit for toolbar with custom render function.
 
-Actually, there are always options of how to structure Combo
-component: more units based on build-in (very basic) render functions
-and less units with custom written render functions; define entire
-structure by units or define layout to wrap rendering in some
-generic way.
+Actually, there are always number of options of how to structure Combo
+component:
+
+- more units based on build-in (very basic) render functions
+- or less units based on custom render functions;
+- define entire Combo component structure by units
+- or define layout to wrap rendering in some generic way.
 
 ## Main concepts
 
@@ -97,6 +99,8 @@ There are two main ideas in Combo:
 
 Units define the structure of the component (they are actually nested Om
 components, managed by Combo). They contain render functions.
+Developers write render functions or they use basic render functions
+from Combo API.
 
 Behavior defines how to manage relations between units.
 

@@ -2,7 +2,8 @@
   (:require [om.core :as om :include-macros true]
             [om-tools.dom :as dom :include-macros true]
             [combo-demo.presentation :as presentation]
-            [combo-demo.spreadsheet :as spreadsheet]))
+            [combo-demo.spreadsheet :as spreadsheet]
+            [combo-demo.login :as login]))
 
 (enable-console-print!)
 
@@ -20,11 +21,14 @@
         (dom/ul
           (dom/li (combo-link "Combo home page"))
           (dom/li
+            (dom/a {:href "https://github.com/ilshad/combo/blob/master/demo/combo_demo/spreadsheet.cljs" :target "_blank"}
+              "Spreadsheet sources"))
+          (dom/li
             (dom/a {:href "https://github.com/ilshad/combo/blob/master/demo/combo_demo/presentation.cljs" :target "_blank"}
               "Presentation sources"))
           (dom/li
-            (dom/a {:href "https://github.com/ilshad/combo/blob/master/demo/combo_demo/spreadsheet.cljs" :target "_blank"}
-              "Spreadsheet sources")))))))
+            (dom/a {:href "https://github.com/ilshad/combo/blob/master/demo/combo_demo/login.cljs" :target "_blank"}
+              "Login form sources")))))))
 
 (defn menu-item [app screen title]
   (dom/li {:class (when (= (:screen app) screen) "active")}
@@ -42,12 +46,14 @@
       (dom/ul {:class "nav navbar-nav nav-pills"}
         (menu-item app :about        "About")
         (menu-item app :spreadsheet  "Spreadsheet")
-        (menu-item app :presentation "Presentation")))))
+        (menu-item app :presentation "Presentation")
+        (menu-item app :login        "Login")))))
 
 (def screens
   {:about        about
    :spreadsheet  spreadsheet/spreadsheet
-   :presentation presentation/presentation})
+   :presentation presentation/presentation
+   :login        login/login})
 
 (defn root [app owner]
   (om/component
@@ -56,7 +62,7 @@
       (om/build (screens (:screen app)) app))))
 
 (defn main []
-  (om/root root (atom {:screen :about})
+  (om/root root (atom {:screen :login})
     {:target js/document.body}))
 
 (set! (.-onload js/window) main)
