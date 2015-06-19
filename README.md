@@ -52,46 +52,12 @@ Om-based code.
 
 However, it is possible to write entire applications with Combo. For
 example, [Demo](http://ilshad.com/combo) includes simple
-Spreadsheet  and Presentation apps. Perhaps, sometimes even a single
-combo/view is enough to build an entire application. Perphaps,
-sometimes it is pretty expressive code to describe user interfaces
-with complex logic.
+Spreadsheet  and Presentation apps.
 
 Possible use cases for Combo:
 
 - multiple tangled relations between UI widgets
 - need for DSL-as-data (maybe, generate DSL for UI from another high-level DSL).
-
-## Drawbacks
-
-Take a look at the [Demo](http://ilshad.com/combo). In order to create
-50 cells, Spreadsheet app mounts 161 Om components (50 for
-`:cell` containers, 50 for `:display` div, 50 for `:edit` input field,
-10 for rows, and 1 for table). Each one requires to initialize a couple of
-core.async channels, go-routines, etc. The result is some delay while
-opening Spreadsheet. This is because we do not write render functions
-at all. Instead, we are combining dynamically generating units based
-on built-in render functions.
-
-As an alternative solution, do not create so many units, but write
-custom render functions. In the Spreadsheet app, we could write render
-function for cell. The result is 61 Om components instead of 161.
-
-We can see an example in Presentation demo app: instead of dynamically
-generating unit for each slide thumbnail, we have defined unit
-`:thumbs` and special render function for this. The total number of
-units in Presentation app is 18: we create unit for each button in the
-toolbar. Possible alternative, for example, is to create single unit
-for toolbar with custom render function.
-
-Actually, there are always number of options of how to structure Combo
-view:
-
-- more units based on build-in render functions
-- or less units based on custom render functions;
-
-- define entire Combo look & feel by units
-- or define layout to wrap rendering in some generic way.
 
 ## Main concepts
 
