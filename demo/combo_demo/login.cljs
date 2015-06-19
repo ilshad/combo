@@ -4,7 +4,7 @@
             [om-tools.dom :as dom :include-macros true]
             [om.core :as om :include-macros true]))
 
-(def forgot-icon
+(def password-reset-icon
   (dom/i {:class "fa fa-question-circle fa-lg"}))
 
 (defn- username-valid? [s]
@@ -13,26 +13,34 @@
 (defn- allow-login? [state]
   (and (:username state) (:password state)))
 
-(defn- messages [state]
+(defn- state->messages [state]
   [[:submit :disabled (not (allow-login? state))]])
 
 (defn- handle-username [v state]
   (let [state (assoc state :username (when (username-valid? v) v))]
-    [(messages state) state]))
+    [(state->messages state) state]))
 
 (defn- handle-password [v state]
   (let [state (assoc state :password (when-not (empty? v) v))]
-    [(messages state) state]))
+    [(state->messages state) state]))
+
+(defn- handle-submit [state]
+  [[[:alert :class "alert alert-danger"]
+    [:alert :value "Login failed"]]
+   state])
 
 (defn behavior [message state]
   (match message
     [:username :value v] (handle-username v state)
     [:password :value v] (handle-password v state)
+    [:submit        _ _] (handle-submit state)
     :else [[] state]))
 
 (defn login [app owner]
   (om/component
     (dom/div {:class "col-xs-6 col-xs-push-3"}
+      (dom/div {:class "alert alert-info"}
+        "Open browser console and see input and output messages.")
       (om/build combo/view nil
         {:opts {:behavior behavior
                 :debug? true
@@ -58,7 +66,7 @@
                                           {:entity :reset-password
                                            :render combo/a
                                            :class "input-group-addon"
-                                           :value forgot-icon}]}]}
+                                           :value password-reset-icon}]}]}
                         {:entity :submit
                          :render combo/button
                          :value "Sign in"
