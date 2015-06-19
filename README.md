@@ -106,7 +106,7 @@ Behavior defines how to manage relations between units.
 
 ## Getting started
 
-1. Add `[combo "0.1.0"]` to dependencies.
+1. Add `[combo "0.1.1"]` to dependencies.
 2. `(require '[combo.api :as combo])`
 
 _(documentation is not accomplished)_
