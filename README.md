@@ -2,6 +2,8 @@
 
 [Demo: simple Spreadsheet app (~120 LOC) and Presentation app (~130 LOC)](http://ilshad.com/combo)
 
+[![Clojars Project](http://clojars.org/combo/latest-version.svg)](http://clojars.org/combo)
+
 ## What It Is
 
 Combo is an abstraction layer on top of ClojureScript framework
@@ -73,9 +75,6 @@ Combo API.
 Behavior defines how to manage relations between units.
 
 ## Getting started
-
-1. Add `[combo "0.1.1"]` to dependencies.
-2. `(require '[combo.api :as combo])`
 
 _(documentation is not accomplished)_
 
