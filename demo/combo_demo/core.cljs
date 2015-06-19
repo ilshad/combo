@@ -1,6 +1,9 @@
 (ns combo-demo.core
-  (:require [om.core :as om :include-macros true]
+  (:require-macros [cljs.core.async.macros :refer [go-loop]])
+  (:require [cljs.core.async :as async]
+            [om.core :as om :include-macros true]
             [om-tools.dom :as dom :include-macros true]
+            [om-tools.core :refer-macros [defcomponent]]
             [combo-demo.presentation :as presentation]
             [combo-demo.spreadsheet :as spreadsheet]
             [combo-demo.login :as login]))
@@ -30,24 +33,23 @@
             (dom/a {:href "https://github.com/ilshad/combo/blob/master/demo/combo_demo/login.cljs" :target "_blank"}
               "Login form sources")))))))
 
-(defn menu-item [app screen title]
+(defn menu-item [app owner screen title]
   (dom/li {:class (when (= (:screen app) screen) "active")}
     (dom/a {:href "#"
             :on-click (fn [e]
-                        (om/update! app :screen screen)
+                        (async/put! (om/get-state owner :screen) screen)
                         (.preventDefault e))}
       title)))
 
-(defn navbar [app]
+(defn navbar [app owner]
   (dom/div {:class "navbar"}
     (dom/div {:class "navbar-header"}
-      (dom/span {:class "navbar-brand"}
-        "Combo Demo")
+      (dom/span {:class "navbar-brand"} "Combo Demo")
       (dom/ul {:class "nav navbar-nav nav-pills"}
-        (menu-item app :about        "About")
-        (menu-item app :spreadsheet  "Spreadsheet")
-        (menu-item app :presentation "Presentation")
-        (menu-item app :login        "Login")))))
+        (menu-item app owner :about        "About")
+        (menu-item app owner :spreadsheet  "Spreadsheet")
+        (menu-item app owner :presentation "Presentation")
+        (menu-item app owner :login        "Login")))))
 
 (def screens
   {:about        about
@@ -55,10 +57,36 @@
    :presentation presentation/presentation
    :login        login/login})
 
-(defn root [app owner]
-  (om/component
+(defcomponent root [app owner]
+  (init-state [_]
+    {:spinner? false
+     :screen (async/chan)})
+  (will-mount [_]
+    ;; Why use spinner here?
+    ;; Spreadsheet creates 161 units, each cell is 3 units.
+    ;; Each unit is one Om component, one go routine two channels.
+    ;; This is why opening spreadsheet spends about 220-300 ms.
+    ;; This problem is easy to solve by writing custom render function
+    ;; for cell (see git branch spreadsheet-cell-render-fn) which reduces
+    ;; this time to about 100-130 ms. But that code is not so demonstrative.
+    ;; Current implementation of Spreadsheet shows flexibility of standard
+    ;; render functions.
+    (let [c (om/get-state owner :screen)]
+      (go-loop []
+        (let [screen (async/<! c)]
+          (when (= screen :spreadsheet)
+            (om/set-state! owner :spinner? true)
+            (async/<! (async/timeout 50)))
+          (om/update! app :screen screen)
+          (async/<! (async/timeout 150))
+          (om/set-state! owner :spinner? false))
+        (recur))))
+  (render-state [_ state]
     (dom/div {:class "container"}
-      (navbar app)
+      (when (:spinner? state)
+        (dom/div {:class "spinner"}
+          (dom/i {:class "fa fa-fw fa-spin fa-spinner"})))
+      (navbar app owner)
       (om/build (screens (:screen app)) app))))
 
 (defn main []

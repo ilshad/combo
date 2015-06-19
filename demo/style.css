@@ -21,6 +21,15 @@ body, input {
     padding: 0;
 }
 
+.spinner {
+    position: absolute;
+    margin-top: 130px;
+    width: 80%;
+    text-align: center;
+    z-index: 2000;
+    font-size: 300%;
+}
+
 /**
  *
  * Spreadsheet
