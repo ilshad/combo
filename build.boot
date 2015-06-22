@@ -1,9 +1,9 @@
-(def +version+ "0.1.2-SNAPSHOT")
+(def +version+ "0.2.0-SNAPSHOT")
 
 (task-options!
   pom {:project     'combo
        :version     +version+
-       :description "state/event driven component for Om"
+       :description "Message driven component for Om"
        :url         "https://github.com/ilshad/combo"
        :scm         {:url "https://github.com/ilshad/combo"}
        :license     {"Eclipse Public License"
