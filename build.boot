@@ -68,7 +68,7 @@
 
 (deftask demo []
   (demo-env!)
-  (comp (serve :dir "target")
+  (comp (serve :dir ".")
         (watch)
         (reload :on-jsload 'combo-demo.core/main)
         (cljs-repl)

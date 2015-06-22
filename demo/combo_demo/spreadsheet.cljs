@@ -19,10 +19,10 @@
   (let [n (js/parseInt x)]
     (when (integer? n) n)))
 
-(defn cell-value [xy state]
+(defn cell-value [state xy]
   (let [cell (state xy)]
     (if (:formula cell)
-      (read-formula (:formula cell) state)
+      (read-formula state (:formula cell))
       ((some-fn number identity) (:value cell)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -31,18 +31,18 @@
 (defn- tokenize-formula [s]
   (rest (rest (string/split s #"(=|/|\*|\+|\-)"))))
 
-(defn- parse-formula [s env]
+(defn- parse-formula [state s]
   (for [x (tokenize-formula s)]
     (or ({"/" / "*" * "+" + "-" -} x)
         (number x)
-        (cell-value x env))))
+        (cell-value state x))))
 
 (defn- infix [x & xs]
   (reduce (fn [res [op y]] (op res y))
     x (partition 2 xs)))
 
-(defn read-formula [s env]
-  (apply infix (parse-formula s env)))
+(defn read-formula [state s]
+  (apply infix (parse-formula state s)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Look and feel
@@ -61,30 +61,30 @@
 (defn- format-value [v]
   (if (number? v) (gstring/format "%.2f" v) v))
 
-(defn- calculate [xy state]
-  [[:display xy] :value (format-value (cell-value xy state))])
+(defn- calculate [state xy]
+  [[:display xy] :value (format-value (cell-value state xy))])
 
-(defn- update-dependencies [xy state]
-  (map #(calculate % state) (get-in state [:dependencies xy])))
+(defn- update-dependencies [state xy]
+  (map (partial calculate state) (get-in state [:dependencies xy])))
 
 (defn- blur [state]
   (case (:mode state)
-    :formula [[] state]
-    [(into [(display-mode (:edit state))
-            (calculate (:focus state) state)]
-           (update-dependencies (:focus state) state))
-     (dissoc state :source)]))
+    :formula [state []]
+    [(dissoc state :source)
+     (into [(display-mode (:edit state))
+            (calculate state (:focus state))]
+       (update-dependencies state (:focus state)))]))
 
-(defn- edit [xy v state]
+(defn- edit [state xy v]
   (if (formula? v)
-    [[(formula-mode xy)] (assoc state :mode :formula xy {:formula v})]
-    [[] (assoc state :mode :value xy {:value v})]))
+    [(assoc state :mode :formula xy {:formula v}) [(formula-mode xy)]]
+    [(assoc state :mode :value xy {:value v}) []]))
 
 (defn- enter [state]
-  [[(display-mode (:edit state))
+  [(dissoc state :mode :edit :source)
+   [(display-mode (:edit state))
     (display-mode (:source state))
-    (calculate (:focus state) state)]
-   (dissoc state :mode :edit :source)])
+    (calculate state (:focus state))]])
 
 (defn- add-dependency [xy]
   (fn [deps]
@@ -92,20 +92,20 @@
       (conj deps xy)
       #{xy})))
 
-(defn- click [xy state]
+(defn- click [state xy]
   (case (:mode state)
     :formula
     (let [formula (str (get-in state [(:focus state) :formula]) xy)]
-      [[(source-mode xy)
+      [(-> (assoc state :source xy (:focus state) {:formula formula})
+           (update-in [:dependencies xy] (add-dependency (:edit state))))
+       [(source-mode xy)
         (display-mode (:source state))
-        [[:edit (:focus state)] :value formula]]
-       (-> (assoc state :source xy (:focus state) {:formula formula})
-           (update-in [:dependencies xy] (add-dependency (:edit state))))])
-    [[(edit-mode xy)
-      (display-mode (:edit state))]
-     (assoc state :edit xy)]))
+        [[:edit (:focus state)] :value formula]]])
+    [(assoc state :edit xy)
+     [(edit-mode xy)
+      (display-mode (:edit state))]]))
 
-(defn- keydown [k state]
+(defn- keydown [state k]
   (case (:mode state)
     :formula
     (if (= k 13)
@@ -113,18 +113,18 @@
       (let [op ({191 "/" 189 "-" 187 "+" 56 "*"} k)
             xy (:edit state)
             v (str (:formula (state xy)) op)]
-        [[[[:edit xy] :value v]] (assoc state xy {:formula v})]))
-    [[] state]))
+        [(assoc state xy {:formula v}) [[[:edit xy] :value v]]]))
+    [state []]))
 
-(defn behavior [message state]
-  (match message
-    [[:edit xy]    :focus?   true]  [[] (assoc state :focus xy)]
+(defn behavior [state event]
+  (match event
+    [[:edit xy]    :focus?   true]  [(assoc state :focus xy) []]
     [[:edit _]     :focus?   false] (blur state)
-    [[:edit xy]    :value    v]     (edit xy v state)
+    [[:edit xy]    :value    v]     (edit state xy v)
     [[:edit _]     :key-down 13]    (enter state)
-    [[:display xy] :click    _]     (click xy state)
-    [[:display _]  :key-down k]     (keydown k state)
-    :else [[] state]))
+    [[:display xy] :click    _]     (click state xy)
+    [[:display _]  :key-down k]     (keydown state k)
+    :else [state []]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Spec
@@ -161,5 +161,6 @@
   (om/component
     (om/build combo/view nil
       {:opts {:behavior behavior
+              :debug? true
               :layout combo/bootstrap-layout
               :units [table]}})))

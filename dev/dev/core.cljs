@@ -24,33 +24,33 @@
       (when (= e.target js/document.body)
         (return [:extern/shortcut :keycode e.keyCode])))))
 
-(defn behavior [message state]
-  (println message state)
-  (match message
+(defn behavior [state event]
+  (match event
 
     [:enable _ value]
-    [[[:note :disabled (not value)]] state]
+    [state [[:note :disabled (not value)]]]
     
     [entity :value value]
-    (let [new-state (assoc state entity value)
-          messages [[:result :value (display-result new-state)]
-                    [:group :class (case entity
-                                     :city "form-group has-error"
-                                     :note "form-group has-warning"
-                                     :user "form-group has-success")]]]
-      [messages new-state])
+    (let [state (assoc state entity value)]
+      [state
+       [[:result :value (display-result state)]
+        [:group :class (case entity
+                         :city "form-group has-error"
+                         :note "form-group has-warning"
+                         :user "form-group has-success")]]])
 
     [:clear _ _]
-    [[[:user :value ""]] (assoc state :user "")]
+    [(assoc state :user "") [[:user :value ""]]]
     
     [:save _ _]
-    [[[:combo/commit :note (display-result state)]] state]
+    [state [[:combo/commit :note (display-result state)]]]
 
-    :else [[] state]))
+    :else [state []]))
 
 (defn view [data]
   (om/build combo/view data
     {:opts {:commit commit
+            :debug? true
             :extern extern
             :behavior behavior
             :layout combo/bootstrap-layout

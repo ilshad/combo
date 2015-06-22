@@ -16,25 +16,24 @@
 (defn- state->messages [state]
   [[:submit :disabled (not (allow-login? state))]])
 
-(defn- handle-username [v state]
+(defn- handle-username [state v]
   (let [state (assoc state :username (when (username-valid? v) v))]
-    [(state->messages state) state]))
+    [state (state->messages state)]))
 
-(defn- handle-password [v state]
+(defn- handle-password [state v]
   (let [state (assoc state :password (when-not (empty? v) v))]
-    [(state->messages state) state]))
+    [state (state->messages state)]))
 
 (defn- handle-submit [state]
-  [[[:alert :class "alert alert-danger"]
-    [:alert :value "Login failed"]]
-   state])
+  [state [[:alert :class "alert alert-danger"]
+          [:alert :value "Login failed"]]])
 
-(defn behavior [message state]
+(defn behavior [state message]
   (match message
-    [:username :value v] (handle-username v state)
-    [:password :value v] (handle-password v state)
+    [:username :value v] (handle-username state v)
+    [:password :value v] (handle-password state v)
     [:submit        _ _] (handle-submit state)
-    :else [[] state]))
+    :else [state []]))
 
 (defn login [app owner]
   (om/component

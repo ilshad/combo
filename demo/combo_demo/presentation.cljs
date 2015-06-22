@@ -41,7 +41,7 @@
 (defn- page->thumb [page id]
   {:id id :content (apply str (take 100 (:content page)))})
 
-(defn- update-message [id state]
+(defn- update-message [state id]
   [[:canvas :value (if (nil? id) "" (:content ((:pages state) id)))]
    [:thumbs :items (map page->thumb (:pages state) (range))]
    [:thumbs :active id]])
@@ -53,48 +53,48 @@
 
 (defn- init []
   (let [state {:pages [(new-page 0)] :active 0}]
-    [(update-message 0 state) state]))
+    [state (update-message state 0)]))
 
-(defn- select-page [id state]
+(defn- select-page [state id]
   (let [state (assoc (save-page-state state) :active id)]
-    [(update-message id state) state]))
+    [state (update-message state id)]))
 
 (defn- add-page [state]
   (let [id (count (:pages state))
         state (update-in (save-page-state state) [:pages]
                 #(conj % (new-page id)))]
-    [(update-message id state) (assoc state :active id)]))
+    [(assoc state :active id) (update-message state id)]))
 
 (defn- del-page [state]
   (if (> (count (:pages state)) 1)
     (let [id (:active state)
           state (update-in state [:pages] #(remove-from-vector % id))
           new-id (dec (count (:pages state)))]
-      [(update-message new-id state) (assoc state :active new-id)])
-    [[] state]))
+      [(assoc state :active new-id) (update-message state new-id)])
+    [state []]))
 
 (defn- save-page [state]
   (let [state (save-page-state state)]
-    [(update-message (:active state) state) state]))
+    [state (update-message state (:active state))]))
 
 (defn- play [state]
   (play-popup! (:pages state))
-  [[] state])
+  [state []])
 
-(defn- text [k state]
+(defn- text [state k]
   (.execCommand js/document (name k))
-  [[] state])
+  [state []])
 
-(defn behavior [message state]
-  (match message
+(defn behavior [state event]
+  (match event
     [:combo/init   _ _] (init)
-    [:thumbs :click id] (select-page id state)
+    [:thumbs :click id] (select-page state id)
     [[:page :add]  _ _] (add-page state)
     [[:page :del]  _ _] (del-page state)
     [[:page :save] _ _] (save-page state)
     [[:file :play] _ _] (play state)
-    [[:text k]     _ _] (text k state)
-    :else [[] state]))
+    [[:text k]     _ _] (text state k)
+    :else [state []]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Render

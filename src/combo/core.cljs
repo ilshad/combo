@@ -50,24 +50,20 @@
     (extern return owner)))
 
 (defn- wrap-debug [spec behavior]
-  (fn [message state]
+  (fn [state event]
     (when (:debug? spec)
-      (println "<<" message " :: " state))
-    (let [[messages new-state] (behavior message state)]
+      (println "<<" state " :: " event))
+    (let [[new-state messages] (behavior state event)]
       (when (:debug? spec)
-        (println "=>" messages " :: " new-state))
-      [messages new-state])))
-
-(defn- debug-behavior [messages state spec]
-  (when (:debug? spec)
-    (println "Behavior:" messages "with state:" state)))
+        (println "=>" new-state " :: " messages))
+      [new-state messages])))
 
 (defn- setup-behavior [data owner spec]
-  (let [behavior (wrap-debug spec (:behavior spec (fn [_ s] [[] s])))
+  (let [behavior (wrap-debug spec (:behavior spec (fn [s _] [s []])))
         return-chan (om/get-state owner :return-chan)
         update-chan (om/get-state owner :update-chan)]
     (go-loop [state {}]
-      (let [[messages new-state] (behavior (async/<! return-chan) state)]
+      (let [[new-state messages] (behavior state (async/<! return-chan))]
         (doseq [m messages]
           (async/>! update-chan m))
         (recur new-state)))
