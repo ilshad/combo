@@ -28,8 +28,8 @@
   [state [[:alert :class "alert alert-danger"]
           [:alert :value "Login failed"]]])
 
-(defn behavior [state message]
-  (match message
+(defn behavior [state event]
+  (match event
     [:username :value v] (handle-username state v)
     [:password :value v] (handle-password state v)
     [:submit        _ _] (handle-submit state)

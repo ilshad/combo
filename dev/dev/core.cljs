@@ -24,8 +24,8 @@
       (when (= e.target js/document.body)
         (return [:extern/shortcut :keycode e.keyCode])))))
 
-(defn behavior [state event]
-  (match event
+(defn behavior [state message]
+  (match message
 
     [:enable _ value]
     [state [[:note :disabled (not value)]]]

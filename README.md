@@ -34,8 +34,8 @@ is just Om component:
 (require '[combo.api :as combo])
 ...
 (om/build combo/view app
-{:opts {:behavior behavior
-        :units units})
+  {:opts {:behavior behavior
+          :units units})
 ```
 
 _In summary, Combo is a library for writing some of your components by
@@ -57,7 +57,7 @@ Behavior :: State, Message -> State, [Message]
 ```
 
 Internally, it is implemented by event bus and pub/sub, and it helps
-to control complexity for composite components by keeping the logic
+to control complexity of composite components by keeping the logic
 centralized.
 
 ## Use cases
