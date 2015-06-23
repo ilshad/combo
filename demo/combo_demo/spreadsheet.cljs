@@ -161,6 +161,5 @@
   (om/component
     (om/build combo/view nil
       {:opts {:behavior behavior
-              :debug? true
               :layout combo/bootstrap-layout
               :units [table]}})))
