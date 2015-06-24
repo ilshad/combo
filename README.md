@@ -16,16 +16,22 @@ message and returns new state and a sequence of messages:
   [state [message-1 message-2 ...])
 ```
 
-This state is not managed by Om, it is Combo state. The messages income
-from nested components and sent to the nested components, but we do
-not write these components. Instead, we describe them in a declarative spec:
+The state is not managed by Om and its updates do not cause any re-rendering.
+
+Messages income from nested components and sent to them, but we do
+not have to write these components. Instead, we describe them as units in
+a declarative spec:
 
 ```clojure
 (def units
   [{:render combo/textarea  :entity :text}
    {:render combo/button    :entity :send}
-   {:render my-render-fn    :entity :yet-another-unit]
+   {:render my-render-fn    :entity :foo}])
 ```
+
+where each unit is based on some render function. In other words,
+instead of writing full components, we have to code only part:
+render methods.
 
 To rule them all, there is single entry point, `combo.api/view`which
 is just Om component:
@@ -38,25 +44,35 @@ is just Om component:
           :units units})
 ```
 
-_In summary, Combo is a library for writing some of your components by
-another, special way: declarative spec for layout and state/event function for
-logic. It is intended to be used within Om-based application along
-with other Om components._
+**In summary, Combo is a library for developing some of your
+components by another way: declarative spec for rendering and
+pure function on messages for state management.**
 
 ## Motivation
 
 All significant computations happen in `behavior` function. Instead of
 tangled wires of core.async channels streched between nested components,
-go-routines, local states, etc., developers describe entire UI logic
-in terms of state machine and messages and they manage it in a single
-place with unidirectional flow by pure functions which transform
-simple data structures:
+go-routines, local states and cursors, developers describe entire
+logic in a single place, with pure function, by transforming simple
+data structures. 
+
+Look at this function more closely:
 
 ```
 Behavior :: State, Message -> State, [Message]
 ```
 
-Internally, it is implemented by event bus and pub/sub, and it helps
+If we'd drop second part of the output - `[Message]`, this function
+becomes _reducer_ function. So we `reduce` with this function over
+stream of input messages. We can save this stream somewhere and
+revert state to the past, or replay by reducing over stream from start.
+
+Actually, _it is_ reducing over input messages, with restriction that
+part of the result (output messages) is never used in the computations.
+
+**Combo does state management with catamorphism over event stream.**
+
+Internally, it is implemented by event bus and pub/sub. And it helps
 to control complexity of composite components by keeping the logic
 centralized.
 
@@ -67,9 +83,8 @@ Good reasons to adopt Combo are:
 - multiple tangled relations between UI widgets
 - need for DSL-as-data (maybe, generate DSL for UI from another high-level DSL).
 
-It is possible to write entire applications with Combo. For example,
-[Demo](http://ilshad.com/combo) includes simple Spreadsheet and
-Presentation apps.
+It is intended to be used within Om-based application along with other
+Om components, but also, it is possible to develop apps entirely with Combo.
 
 ## Main concepts
 
