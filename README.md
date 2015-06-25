@@ -53,8 +53,11 @@ pure function on messages for state management.**
 All significant computations happen in `behavior` function. Instead of
 tangled wires of core.async channels streched between nested components,
 go-routines, local states and cursors, developers describe entire
-logic in a single place, with pure function, by transforming simple
-data structures. 
+logic:
+
+1. In a single place.
+2. With pure function.
+3. By transforming simple data structures.
 
 Look at this function more closely:
 
@@ -85,19 +88,6 @@ Good reasons to adopt Combo are:
 
 It is intended to be used within Om-based application along with other
 Om components, but also, it is possible to develop apps entirely with Combo.
-
-## Main concepts
-
-There are two main ideas in Combo:
-
-- units
-- behavior
-
-Units define the structure of the combo. They contain render functions.
-Developers write render functions or use basic render functions from
-Combo API.
-
-Behavior defines how to manage relations between units.
 
 ## Getting started
 
