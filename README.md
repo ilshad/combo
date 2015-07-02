@@ -26,9 +26,9 @@ a declarative spec:
 
 ```clojure
 (def units
-  [{:render combo/textarea  :entity :text}
-   {:render combo/button    :entity :send}
-   {:render render-foo      :entity :foo}])
+  [{:entity :text   :render combo/textarea}
+   {:entity :send   :render combo/button}
+   {:entity :foo    :render render-foo}])
 ```
 
 where `:entity` is identifier and `:render` is a function:
@@ -44,7 +44,7 @@ where `:entity` is identifier and `:render` is a function:
 
 The messages sent from render function to behavior through
 `return-chan`. It is up to developer of render function to deside what
-is the actual format these messages. In any case, you have to build
+is the actual format of these messages. In any case, you have to build
 control flow on these messages in behavior. It is handy to use core.match:
 
 ```clojure
