@@ -35,27 +35,26 @@ where `:entity` is identifier and `:render` is a function:
 
 ```clojure
 (defn render-foo [owner spec]
-  (let [return-chan (om/get-state owner :return-chan)]
-	(dom/h1 #js {:onMouseOut  #(put! return-chan [(:entity spec) :out])
-		         :onMouseOver #(put! return-chan [(:entity spec) :over])
-				 :onClick     #(put! return-chan [(:entity spec) :click])}
+  (let [return (om/get-state owner :return-chan)
+        entity (:entity spec)]
+	(dom/h1 #js {:onMouseOut  #(put! return [entity :out])
+		         :onMouseOver #(put! return [entity :over])
+				 :onClick     #(put! return [entity :click])}
       (or (om/get-state owner :title) "Take a look."))))
 ```
 
 The messages sent from render function to behavior through
 `return-chan`. It is up to developer of render function to deside what
 is the actual format of these messages. In any case, you have to build
-control flow on these messages in behavior. It is handy to use core.match:
+control flow on these messages in behavior:
 
 ```clojure
-(require '[cljs.core.match :refer-macros [match]])
-...
 (defn behavior [state message]
-  (match message
+  (case message
     [:foo :out]   [state [[:foo :title "Take a look."]]]
     [:foo :over]  [state [[:foo :title "Click here."]]]
     [:foo :click] [state [[:foo :title "Thanks!"]]]
-    :else         [state []]))
+                  [state []]))
 ```
 
 Outcoming messsages (from behavior) are triplets
@@ -64,7 +63,7 @@ Outcoming messsages (from behavior) are triplets
 of the unit.
 
 In other words, instead of writing full components, we have to code
-only rendering part and manage state with kind of messages hub.
+only rendering part and manage state with kind of event hub.
 
 To rule them all, there is an entry point, `combo.api/view`which is
 just Om component:
@@ -98,7 +97,7 @@ developers describe entire logic:
 Second advantage is simplier reusability. One may have:
 
 1. a lot of similar widgets in the project,
-2. different composite views on top of these widgets.
+2. different composite views build with these widgets.
 
 In order to minimize amount of code, one may want:
 
