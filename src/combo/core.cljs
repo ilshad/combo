@@ -26,28 +26,25 @@
 
 (defn- setup-commit [data owner spec]
   (let [commit (:commit spec default-commit)
-        pubc   (om/get-state owner :update-pubc)
+        pub    (om/get-state owner :output-pub)
         in     (om/get-state owner :intern-chan)
         out    (om/get-state owner :commit-chan)]
-    (async/sub pubc :combo/commit in)
+    (async/sub pub :combo/commit in)
     (go-loop []
       (let [message (async/<! in)]
-        (commit {:chan out
-                 :data data
-                 :owner owner
-                 :message message}))
+        (commit {:chan out :data data :owner owner :message message}))
       (recur))))
 
-(defn- default-extern [return owner]
+(defn- default-extern [input owner]
   (when-let [c (om/get-state owner :extern-chan)]
     (go-loop []
-      (return (async/<! c))
+      (input (async/<! c))
       (recur))))
 
 (defn- setup-extern [_ owner spec]
   (let [extern (:extern spec default-extern)
-        return (partial async/put! (om/get-state owner :return-chan))]
-    (extern return owner)))
+        input (partial async/put! (om/get-state owner :input-chan))]
+    (extern input owner)))
 
 (defn- wrap-debug [spec behavior]
   (fn [state event]
@@ -60,28 +57,28 @@
 
 (defn- setup-behavior [data owner spec]
   (let [behavior (wrap-debug spec (:behavior spec (fn [s _] [s []])))
-        return-chan (om/get-state owner :return-chan)
-        update-chan (om/get-state owner :update-chan)]
+        input-chan (om/get-state owner :input-chan)
+        output-chan (om/get-state owner :output-chan)]
     (go-loop [state {}]
-      (let [[new-state messages] (behavior state (async/<! return-chan))]
+      (let [[new-state messages] (behavior state (async/<! input-chan))]
         (doseq [m messages]
-          (async/>! update-chan m))
+          (async/>! output-chan m))
         (recur new-state)))
-    (async/put! return-chan [:combo/init :data data])))
+    (async/put! input-chan [:combo/init :data data])))
 
 (defn- unit-init-state [data spec]
   (let [props #(select-keys % [:value :options :class :disabled])]
     (merge
       (props spec)
-      (when-let [v (get data (:entity spec))]
+      (when-let [v (get data (:id spec))]
         (if (map? v)
           (props v)
           {:value v})))))
 
 (defn- unit-params [data owner spec layout]
   {:init-state (assoc (unit-init-state data spec)
-                 :update-pubc (om/get-state owner :update-pubc)
-                 :return-chan (om/get-state owner :return-chan))
+                 :input-chan (om/get-state owner :input-chan)
+                 :output-pub (om/get-state owner :output-pub))
    :opts (assoc spec :layout layout)})
 
 (defn- build [data owner layout]
@@ -89,51 +86,47 @@
     (om/build unit data
       (unit-params data owner (control layout spec) layout))))
 
-(defn- nested [data owner spec]
-  (when-let [units (:units spec)]
-    (map (build data owner (:layout spec)) units)))
-
-(defn- render-unit [owner spec units]
+(defn- render-unit [owner spec nested]
   (let [f (:render spec)]
-    (if units
-      (f owner spec units)
-      (f owner spec))))
+    (if (empty? nested)
+      (f owner spec)
+      (f owner spec nested))))
 
 (defn- unit [data owner spec]
   (reify
     
     om/IInitState
     (init-state [_]
-      {:change-chan (async/chan)
-       :update-chan (async/chan)})
+      {:local-chan (async/chan)
+       :output-chan (async/chan)})
 
     om/IWillMount
     (will-mount [_]
-      (let [interceptor (:interceptor spec identity)
-            change-chan (om/get-state owner :change-chan)
-            return-chan (om/get-state owner :return-chan)
-            update-chan (om/get-state owner :update-chan)
-            update-pubc (om/get-state owner :update-pubc)]
-        (async/sub update-pubc (:entity spec) update-chan)
+      (let [validator   (:validator spec identity)
+            local-chan  (om/get-state owner :local-chan)
+            input-chan  (om/get-state owner :input-chan)
+            output-chan (om/get-state owner :output-chan)
+            output-pub  (om/get-state owner :output-pub)]
+        (async/sub output-pub (:id spec) output-chan)
         (go-loop []
           (alt!
-            change-chan
+            local-chan
             ([v]
-             (let [v (interceptor v)]
+             (let [v (validator v)]
                (when-not (nil? v)
                  (om/set-state! owner :value v)
-                 (async/>! return-chan [(:entity spec) :value v]))
+                 (async/>! input-chan [(:id spec) :value v]))
                (om/refresh! owner)))
-            update-chan
-            ([[_ attr value]]
-             (om/set-state! owner attr value)))
+            output-chan
+            ([[_ key value]]
+             (om/set-state! owner key value)))
           (recur))))
 
     om/IRender
     (render [_]
       (let [wrap (:wrap spec (fn [_ x] x))
-            units (nested data owner spec)
-            content (render-unit owner spec units)]
+            nested (map (build data owner (:layout spec)) (:units spec))
+            content (render-unit owner spec nested)]
         (wrap owner content)))))
 
 (defn view [data owner spec]
@@ -141,10 +134,10 @@
 
     om/IInitState
     (init-state [_]
-      (let [update-chan (async/chan)]
-        {:update-chan update-chan
-         :update-pubc (async/pub update-chan first)
-         :return-chan (async/chan)
+      (let [output-chan (async/chan)]
+        {:output-chan output-chan
+         :output-pub  (async/pub output-chan first)
+         :input-chan  (async/chan)
          :intern-chan (async/chan)}))
 
     om/IWillMount

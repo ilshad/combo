@@ -2,9 +2,9 @@
 
 [![Clojars Project](http://clojars.org/combo/latest-version.svg)](http://clojars.org/combo)
 
-[Combo Online: interactive tutorial and in in-browser IDE](http://ilshad.com/combo-online)  (_this is not finished yet_)
+[Combo Online: interactive tutorial](http://ilshad.com/combo-online)  (_this is not finished yet_)
 
-[Combo Demo: simple Spreadsheet app (~120 LOC) and Presentation app (~130 LOC)](http://ilshad.com/combo)
+[Combo Demo: simple Spreadsheet (~120 LOC) and Presentation Authoring (~130 LOC)](http://ilshad.com/combo)
 
 ## What It Is
 
@@ -21,46 +21,43 @@ message and returns new state and a sequence of messages:
 The state is not managed by Om and its updates do not cause any re-rendering.
 
 Messages income from nested components and sent to them, but we do
-not have to write these components. Instead, we describe them as units in
-a declarative spec:
+not have to write these components, as we usually do. Instead, we
+describe them as units in a declarative spec:
 
 ```clojure
 (def units
-  [{:entity :text   :render combo/textarea}
-   {:entity :send   :render combo/button}
-   {:entity :foo    :render render-foo}])
+  [{:id :foo :render foo}
+   {:id :bar :render combo/button}
+   {:id :baz :render combo/textarea}])
 ```
 
-where `:entity` is identifier and `:render` is a function:
+where `:render` is a function:
 
 ```clojure
-(defn render-foo [owner spec]
-  (let [return (om/get-state owner :return-chan)
-        entity (:entity spec)]
-	(dom/h1 #js {:onMouseOut  #(put! return [entity :out])
-		         :onMouseOver #(put! return [entity :over])
-				 :onClick     #(put! return [entity :click])}
-      (or (om/get-state owner :title) "Take a look."))))
+(defn foo [owner spec]
+  (let [chan (om/get-state owner :input-chan)]
+	(dom/h1 #js {:onMouseOver #(put! chan [(:id spec) :over])}
+      (om/get-state owner :title))))
 ```
 
 The messages sent from render function to behavior through
-`return-chan`. It is up to developer of render function to deside what
-is the actual format of these messages. In any case, you have to build
+`input-chan`. It is up to developer of render function to deside what
+is the actual format of these messages. Then, you have to build
 control flow on these messages in behavior:
 
 ```clojure
 (defn behavior [state message]
-  (case message
-    [:foo :out]   [state [[:foo :title "Take a look."]]]
-    [:foo :over]  [state [[:foo :title "Click here."]]]
-    [:foo :click] [state [[:foo :title "Thanks!"]]]
-                  [state []]))
+  (core.match/match message
+    [:foo :over] [state [[:foo :title "Click here."]]]
+	...
+	:else [state []]))
 ```
 
-Outcoming messsages (from behavior) are triplets
-`[entity attribute value]`, where `entity` is identifier of unit, while
-`attribute` and `value` becomes key and value in the local state
-of the unit.
+Outcoming messsages (from behavior) are triplets:
+
+- unit id,
+- unit local state key,
+- unit local state value.
 
 In other words, instead of writing full components, we have to code
 only rendering part and manage state with kind of event hub.
@@ -71,12 +68,12 @@ just Om component:
 ```clojure
 (om/build combo/view app
   {:opts {:behavior behavior
-          :units    units})
+          :units units})
 ```
 
 **In summary, Combo is a library for developing some of your
-components by another way: declarative spec for rendering and
-pure function on messages for state management.**
+complex components by another way: stateful functions for rendering
+and pure function on messages for state management.**
 
 ## Motivation
 
@@ -96,7 +93,7 @@ developers describe entire logic:
 
 Second advantage is simplier reusability. One may have:
 
-1. a lot of similar widgets in the project,
+1. a lot of similar widgets in a project,
 2. different composite views build with these widgets.
 
 In order to minimize amount of code, one may want:

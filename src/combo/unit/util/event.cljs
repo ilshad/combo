@@ -4,21 +4,21 @@
 
 (defn on-change [owner]
   (fn [e]
-    (async/put! (om/get-state owner :change-chan)
+    (async/put! (om/get-state owner :local-chan)
       (.. e -target -value))))
 
-(defn focus? [owner entity yes?]
+(defn focus? [owner id yes?]
   (fn [e]
-    (async/put! (om/get-state owner :return-chan) [entity :focus? yes?])
+    (async/put! (om/get-state owner :input-chan) [id :focus? yes?])
     (.preventDefault e)))
 
 (defn return-key-code
-  [{:keys [owner entity attr filter-codes-set capture-codes-set]}]
+  [{:keys [owner id key filter-codes-set capture-codes-set]}]
   (fn [e]
     (let [k (.-keyCode e)
           return? (if filter-codes-set (filter-codes-set k) true)]
       (when return?
-        (async/put! (om/get-state owner :return-chan) [entity attr k]))
+        (async/put! (om/get-state owner :input-chan) [id key k]))
       (when (capture-codes-set k)
         (.preventDefault e)))))
 

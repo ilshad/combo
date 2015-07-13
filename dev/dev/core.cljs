@@ -30,22 +30,59 @@
     [:enable _ value]
     [state [[:note :disabled (not value)]]]
     
-    [entity :value value]
-    (let [state (assoc state entity value)]
+    [unit :value value]
+    (let [state (assoc state unit value)]
       [state
        [[:result :value (display-result state)]
-        [:group :class (case entity
+        [:group :class (case unit
                          :city "form-group has-error"
                          :note "form-group has-warning"
                          :user "form-group has-success")]]])
 
     [:clear _ _]
     [(assoc state :user "") [[:user :value ""]]]
-    
+
     [:save _ _]
     [state [[:combo/commit :note (display-result state)]]]
 
     :else [state []]))
+
+(def units
+  [{:id :group
+    :render combo/div
+    :class "form-group"
+    :units [{:render combo/div
+             :class "input-group"
+             :units [{:id :user
+                      :render combo/input
+                      :type "text"
+                      :validator validate-user}
+                     {:id :clear
+                      :render combo/a
+                      :class "input-group-addon"
+                      :value "Clear"}]}]}
+   {:id :city
+    :pretty? true
+    :return-key-down? true
+    :capture-key-down #{13}
+    :render combo/select}
+   {:id :enable
+    :render combo/checkbox
+    :pretty? true
+    :label "Enable note field"}
+   {:id :note
+    :disabled true
+    :render combo/textarea
+    :pretty? true
+    :label "Note"}
+   {:id :save
+    :render combo/button
+    :value "Save"
+    :pretty? true
+    :class "btn btn-primary btn-block"}
+   {:id :result
+    :pretty? true
+    :render combo/div}])
 
 (defn view [data]
   (om/build combo/view data
@@ -54,42 +91,7 @@
             :extern extern
             :behavior behavior
             :layout combo/bootstrap-layout
-            :units [{:entity :group
-                     :render combo/div
-                     :class "form-group"
-                     :units [{:entity 42
-                              :render combo/div
-                              :class "input-group"
-                              :units [{:entity :user
-                                       :render combo/input
-                                       :type "text"
-                                       :interceptor validate-user}
-                                      {:entity :clear
-                                       :render combo/a
-                                       :class "input-group-addon"
-                                       :value "Clear"}]}]}
-                    {:entity :city
-                     :pretty? true
-                     :return-key-down? true
-                     :capture-key-down #{13}
-                     :render combo/select}
-                    {:entity :enable
-                     :render combo/checkbox
-                     :pretty? true
-                     :label "Enable note field"}
-                    {:entity :note
-                     :disabled true
-                     :render combo/textarea
-                     :pretty? true
-                     :label "Note"}
-                    {:entity :save
-                     :render combo/button
-                     :value "Save"
-                     :pretty? true
-                     :class "btn btn-primary btn-block"}
-                    {:entity :result
-                     :pretty? true
-                     :render combo/div}]}}))
+            :units units}}))
 
 (defn root [data owner]
   (om/component

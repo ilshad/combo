@@ -1,4 +1,4 @@
-(def +version+ "0.2.1-SNAPSHOT")
+(def +version+ "0.3.0-SNAPSHOT")
 
 (task-options!
   pom {:project     'combo

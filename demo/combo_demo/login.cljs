@@ -35,6 +35,36 @@
     [:submit        _ _] (handle-submit state)
     :else [state []]))
 
+(def units
+  [{:id :alert
+    :render combo/div
+    :class "hidden"}
+   {:id :username
+    :render combo/input
+    :type "email"
+    :name "username"
+    :placeholder "Email"
+    :pretty? true}
+   {:render combo/div
+    :class "form-group"
+    :units [{:render combo/div
+             :class "input-group"
+             :units [{:id :password
+                      :render combo/input
+                      :type "password"
+                      :name "password"
+                      :placeholder "Password"}
+                     {:id :reset-password
+                      :render combo/a
+                      :class "input-group-addon"
+                      :value password-reset-icon}]}]}
+   {:id :submit
+    :render combo/button
+    :value "Sign in"
+    :class "btn btn-primary btn-block"
+    :disabled true
+    :pretty? true}])
+
 (defn login [app owner]
   (om/component
     (dom/div {:class "col-xs-6 col-xs-push-3"}
@@ -44,31 +74,4 @@
         {:opts {:behavior behavior
                 :debug? true
                 :layout combo/bootstrap-layout
-                :units [{:entity :alert
-                         :render combo/div
-                         :class "hidden"}
-                        {:entity :username
-                         :render combo/input
-                         :type "email"
-                         :name "username"
-                         :placeholder "Email"
-                         :pretty? true}
-                        {:render combo/div
-                         :class "form-group"
-                         :units [{:render combo/div
-                                  :class "input-group"
-                                  :units [{:entity :password
-                                           :render combo/input
-                                           :type "password"
-                                           :name "password"
-                                           :placeholder "Password"}
-                                          {:entity :reset-password
-                                           :render combo/a
-                                           :class "input-group-addon"
-                                           :value password-reset-icon}]}]}
-                        {:entity :submit
-                         :render combo/button
-                         :value "Sign in"
-                         :class "btn btn-primary btn-block"
-                         :disabled true
-                         :pretty? true}]}}))))
+                :units units}}))))

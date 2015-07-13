@@ -108,7 +108,7 @@
                     (when (= (:id i) (om/get-state owner :active))
                       " active"))
            :on-click (fn [e]
-                       (async/put! (om/get-state owner :return-chan)
+                       (async/put! (om/get-state owner :input-chan)
                          [:thumbs :click (:id i)])
                        (.preventDefault e))})))))
 
@@ -137,10 +137,27 @@
 (def file-actions
   [[[:file :play]          "play"]])
 
-(defn button [[entity icon]]
-  {:entity entity
+(defn button [[id icon]]
+  {:id id
    :render combo/button
    :value (dom/i {:class (str "fa fa-" icon)})})
+
+(def units
+  [{:render combo/div
+    :class "row"
+    :units [{:render combo/div
+             :class "btn-group col-xs-2"
+             :units (map button page-actions)}
+            {:render combo/div
+             :class "btn-group col-xs-4 no-padding"
+             :units (map button workspace-actions)}
+            {:render combo/div
+             :class "btn-group col-xs-1"
+             :units (map button file-actions)}]}
+   {:render combo/div
+    :class "row"
+    :units [{:id :thumbs :render render-thumbs}
+            {:id :canvas :render render-canvas}]}])
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Public
@@ -150,20 +167,4 @@
     (om/build combo/view nil
       {:opts {:behavior behavior
               :layout combo/bootstrap-layout
-              :units [{:render combo/div
-                       :class "row"
-                       :units [{:render combo/div
-                                :class "btn-group col-xs-2"
-                                :units (map button page-actions)}
-                               {:render combo/div
-                                :class "btn-group col-xs-4 no-padding"
-                                :units (map button workspace-actions)}
-                               {:render combo/div
-                                :class "btn-group col-xs-1"
-                                :units (map button file-actions)}]}
-                      {:render combo/div
-                       :class "row"
-                       :units [{:entity :thumbs
-                                :render render-thumbs}
-                               {:entity :canvas
-                                :render render-canvas}]}]}})))
+              :units units}})))

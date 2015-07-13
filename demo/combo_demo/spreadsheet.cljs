@@ -131,14 +131,14 @@
 
 (defn- cell [x y]
   (let [xy (str x y)]
-    {:entity [:cell xy]
+    {:id [:cell xy]
      :render combo/div
      :class "display-mode cell col-xs-2"
-     :units [{:entity [:display xy]
+     :units [{:id [:display xy]
               :return-key-down? true
               :capture-key-down #{191 189 187 56 13}
               :render combo/a}
-             {:entity [:edit xy]
+             {:id [:edit xy]
               :render combo/input
               :type "text"
               :return-key-down? true
