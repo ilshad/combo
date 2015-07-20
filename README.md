@@ -2,8 +2,6 @@
 
 [![Clojars Project](http://clojars.org/combo/latest-version.svg)](http://clojars.org/combo)
 
-[Combo Online: interactive tutorial](http://ilshad.com/combo-online)  (_this is not finished yet_)
-
 [Combo Demo: simple Spreadsheet (~120 LOC) and Presentation Authoring (~130 LOC)](http://ilshad.com/combo)
 
 ## What It Is
@@ -36,30 +34,30 @@ where `:render` is a function:
 ```clojure
 (defn foo [owner spec]
   (let [chan (om/get-state owner :input-chan)]
-	(dom/h1 #js {:onMouseOver #(put! chan [(:id spec) :over])}
-      (om/get-state owner :title))))
+    (dom/input #js {:className (om/get-state owner :class)
+                    :onChange #(async/put! chan [:foo (.. % -target -value)])})))
 ```
 
 The messages sent from render function to behavior through
-`input-chan`. It is up to developer of render function to deside what
-is the actual format of these messages. Then, you have to build
-control flow on these messages in behavior:
+`input-chan`. It is up to developer of render function to decide what
+is the actual format of these messages. They all are collected as
+input in behavior, so you have to build control flow on them:
 
 ```clojure
 (defn behavior [state message]
   (core.match/match message
-    [:foo :over] [state [[:foo :title "Click here."]]]
-	...
+	[:foo x] [state [[:foo :class (if (= x "q") "success" "error")]]]
+    ...
 	:else [state []]))
 ```
 
-Outcoming messsages (from behavior) are triplets:
+Outcoming messsages (from behavior) should be triplets:
 
 - unit id,
 - unit local state key,
 - unit local state value.
 
-In other words, instead of writing full components, we have to code
+In other words, instead of writing full Om components, we have to code
 only rendering part and manage state with kind of event hub.
 
 To rule them all, there is an entry point, `combo.api/view`which is
@@ -67,13 +65,12 @@ just Om component:
 
 ```clojure
 (om/build combo/view app
-  {:opts {:behavior behavior
-          :units units})
+  {:opts {:behavior behavior :units units})
 ```
 
 **In summary, Combo is a library for developing some of your
-complex components by another way: stateful functions for rendering
-and pure function on messages for state management.**
+complex Om components by another way: render functions for rendering
+subcomponents and single function on messages for state management.**
 
 ## Motivation
 
@@ -91,20 +88,13 @@ developers describe entire logic:
 
 ### Reusability
 
-Second advantage is simplier reusability. One may have:
-
-1. a lot of similar widgets in a project,
-2. different composite views build with these widgets.
-
-In order to minimize amount of code, one may want:
-
-1. to design a unified way to customize widgets;
-2. to design a unified way to build composite views;
-3. to describe widgets and composite views by some declarative DSL;
-4. flexible but simple solution to describe relations between these widgets;
-5. flexible but simple solution to control other problems related to state mangement.
-
-Combo does exactly these things.
+We have discovered that render functions is much simplier to reuse and they
+are more pluggalbe thing than full components. Actually, Combo API
+provides few standard render functions
+(see [API Documentation](https://github.com/ilshad/combo/wiki/API)),
+and you can see that they are pretty flexible and customizable. Entire
+applications can be built with only standard render functions, so
+developers write only declarative spec and behavior.
 
 ## Use cases
 
@@ -118,15 +108,9 @@ Om components, but also, it is possible to develop apps entirely with Combo.
 
 ## Getting started
 
-1. (_this is not finished yet_) Go to
-[Combo Online](http://ilshad.com/combo-online),
-where you can play with basic concepts and develop some components
-without installing anything locally. It is written in Combo itself, so
-take a look [its sources](http://github.com/ilshad/combo-online).
-
-2.  (_this is not finished yet_) Start with [tutorial](http://github.com/ilshad/combo/wiki/Tutorial).
-
-3. Take a look at source code of [demo](http://ilshad.com/combo).
+1. Start with [Tutorial](http://github.com/ilshad/combo/wiki/Tutorial).
+2. Take a look at source code of [Demo](http://ilshad.com/combo).
+3. Use [API Documentation](https://github.com/ilshad/combo/wiki/API).
 
 Full documentation is [here](http://github.com/ilshad/combo/wiki).
 
