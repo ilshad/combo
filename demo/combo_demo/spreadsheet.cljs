@@ -157,7 +157,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Public
 
-(defn spreadsheet [app owner]
+(defn spreadsheet [_ _]
   (om/component
     (om/build combo/view nil
       {:opts {:behavior behavior

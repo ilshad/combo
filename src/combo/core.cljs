@@ -87,10 +87,11 @@
       (unit-params data owner (control layout spec) layout))))
 
 (defn- render-unit [owner spec nested]
-  (let [f (:render spec)]
+  (let [f (:render spec)
+        s (om/get-state owner)]
     (if (empty? nested)
-      (f owner spec)
-      (f owner spec nested))))
+      (f s spec)
+      (f s spec nested))))
 
 (defn- unit [data owner spec]
   (reify
@@ -127,7 +128,7 @@
       (let [wrap (:wrap spec (fn [_ x] x))
             nested (map (build data owner (:layout spec)) (:units spec))
             content (render-unit owner spec nested)]
-        (wrap owner content)))))
+        (wrap (om/get-state owner) content)))))
 
 (defn view [data owner spec]
   (reify

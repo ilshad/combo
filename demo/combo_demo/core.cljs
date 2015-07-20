@@ -64,13 +64,12 @@
   (will-mount [_]
     ;; Why use spinner here?
     ;; Spreadsheet creates 161 units, each cell is 3 units.
-    ;; Each unit is one Om component, one go routine two channels.
+    ;; Each unit is one Om component, one go routine and two channels.
     ;; This is why opening spreadsheet spends about 220-300 ms.
     ;; This problem is easy to solve by writing custom render function
-    ;; for cell (see git branch spreadsheet-cell-render-fn) which reduces
-    ;; this time to about 100-130 ms. But that code is not so demonstrative.
-    ;; Current implementation of Spreadsheet shows flexibility of standard
-    ;; render functions.
+    ;; for cell, which reduces this time to about 100-130 ms. But that
+    ;; code is not so demonstrative. The current implementation of
+    ;; Spreadsheet shows flexibility of standard render functions.
     (let [c (om/get-state owner :screen)]
       (go-loop []
         (let [screen (async/<! c)]

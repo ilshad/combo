@@ -32,15 +32,15 @@ describe them as units in a declarative spec:
 where `:render` is a function:
 
 ```clojure
-(defn foo [owner spec]
-  (let [chan (om/get-state owner :input-chan)]
-    (dom/input #js {:className (om/get-state owner :class)
-                    :onChange #(async/put! chan [:foo (.. % -target -value)])})))
+(defn foo [{:keys [class input-chan]} spec]
+  (dom/input #js {:className class}
+                  :onChange #(async/put! input-chan
+					           [:foo (.. % -target -value)])}))
 ```
 
 The messages sent from render function to behavior through
 `input-chan`. It is up to developer of render function to decide what
-is the actual format of these messages. They all are collected as
+is the actual format of these messages. They are collected as
 input in behavior, so you have to build control flow on them:
 
 ```clojure

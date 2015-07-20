@@ -1,55 +1,53 @@
 (ns combo.unit.util.attr
   (:require [cljs.core.async :as async]
-            [om.core :as om :include-macros true]
             [combo.unit.util.event :as event]))
 
-(defn basic [owner spec]
-  (into {:id (:element-id spec)
-         :className (om/get-state owner :class)}
+(defn basic [state spec]
+  (into {:id (:element-id spec) :className (:class state)}
     (when-let [attrs (:attrs spec)]
-      (attrs owner spec))))
+      (attrs state spec))))
 
-(defn field [owner spec]
+(defn field [state spec]
   {:name      (:name spec)
-   :disabled  (om/get-state owner :disabled)})
+   :disabled  (:disabled state)})
 
-(defn value [owner spec]
-  {:value     (om/get-state owner :value)
-   :onChange  (event/on-change owner)
-   :onFocus   (event/focus? owner (:id spec) true)
-   :onBlur    (event/focus? owner (:id spec) false)})
+(defn value [state spec]
+  {:value     (:value state)
+   :onChange  (event/on-change state)
+   :onFocus   (event/focus? state (:id spec) true)
+   :onBlur    (event/focus? state (:id spec) false)})
 
-(defn input [owner spec]
+(defn input [state spec]
   {:type        (:type spec)
    :placeholder (:placeholder spec)})
 
-(defn check [owner spec]
+(defn check [state spec]
   {:type     "checkbox"
-   :checked  (om/get-state owner :value)
+   :checked  (:value state)
    :onChange (fn [e]
-               (async/put! (om/get-state owner :local-chan)
+               (async/put! (:local-chan state)
                  (.. e -target -checked)))})
 
-(defn click [owner spec]
+(defn click [state spec]
   {:onClick (fn [e]
-              (async/put! (om/get-state owner :input-chan)
+              (async/put! (:input-chan state)
                 [(:id spec) :click (event/event-keys e)])
               (.preventDefault e))})
 
-(defn form [owner spec]
+(defn form [state spec]
   {:method (:method spec)
    :action (:action spec)
    :onSubmit (fn [e]
-               (async/put! (om/get-state owner :input-chan)
+               (async/put! (:input-chan state)
                  [(:id spec) :submit true])
                (.preventDefault e))})
 
-(defn onkey [owner spec]
+(defn onkey [state spec]
   (merge {}
     (when (:return-key-up? spec)
       {:onKeyUp
        (event/return-key-code
-         {:owner owner
+         {:state state
           :id (:id spec)
           :key :key-up
           :filter-codes-set (:filter-key-down spec)
@@ -57,7 +55,7 @@
     (when (:return-key-down? spec)
       {:onKeyDown
        (event/return-key-code
-         {:owner owner
+         {:state state
           :id (:id spec)
           :key :key-down
           :filter-codes-set (:filter-key-down spec)

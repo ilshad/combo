@@ -65,7 +65,7 @@
     :disabled true
     :pretty? true}])
 
-(defn login [app owner]
+(defn login [_ _]
   (om/component
     (dom/div {:class "col-xs-6 col-xs-push-3"}
       (dom/div {:class "alert alert-info"}

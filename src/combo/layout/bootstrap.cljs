@@ -1,6 +1,5 @@
 (ns combo.layout.bootstrap
-  (:require [om.core :as om :include-macros true]
-            [om.dom :as dom :include-macros true]
+  (:require [om.dom :as dom :include-macros true]
             [combo.unit.render :as unit]
             [combo.core :as combo]))
 
@@ -17,10 +16,9 @@
         (spec :wrap
           (if (:units spec)
             (fn [_ x] x)
-            (fn [owner content]
+            (fn [{:keys [group-class]} content]
               (if (:pretty? spec)
-                (let [cls (or (om/get-state owner :group-class)
-                              (:group-class spec))]
+                (let [cls (or group-class (:group-class spec))]
                   (condp = (:render spec)
                     unit/checkbox
                     (dom/div #js {:className cls}

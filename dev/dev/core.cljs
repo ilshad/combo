@@ -93,7 +93,7 @@
             :layout combo/bootstrap-layout
             :units units}}))
 
-(defn root [data owner]
+(defn root [data _]
   (om/component
     (dom/div {:class "container"}
       (dom/div {:class "row"}

@@ -99,23 +99,21 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Render
 
-(defn render-thumbs [owner _]
+(defn render-thumbs [{:keys [items active input-chan]} _]
   (dom/div {:class "thumbs col-xs-2"}
     (dom/div {:class "thumbs-inner"}
-      (for [i (om/get-state owner :items)]
+      (for [i items]
         (inner-html (:content i)
           {:class (str "thumb"
-                    (when (= (:id i) (om/get-state owner :active))
+                    (when (= (:id i) active)
                       " active"))
            :on-click (fn [e]
-                       (async/put! (om/get-state owner :input-chan)
-                         [:thumbs :click (:id i)])
+                       (async/put! input-chan [:thumbs :click (:id i)])
                        (.preventDefault e))})))))
 
-(defn render-canvas [owner _]
+(defn render-canvas [{:keys [value]} _]
   (dom/div {:class "workspace col-xs-10"}
-    (inner-html (om/get-state owner :value)
-      {:id "canvas" :class "canvas" :contentEditable ""})))
+    (inner-html value {:id "canvas" :class "canvas" :contentEditable ""})))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Spec
@@ -162,7 +160,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Public
 
-(defn presentation [app owner]
+(defn presentation [_ _]
   (om/component
     (om/build combo/view nil
       {:opts {:behavior behavior
