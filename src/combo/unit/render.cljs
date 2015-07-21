@@ -76,5 +76,6 @@
       (merge (attr/click m)
              (attr/onkey m)
              (attr/basic m)))
-    (or (:value m)
-        (:units m))))
+    (if-let [value (:value m)]
+      [(:value m)]
+      (:units m))))
