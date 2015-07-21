@@ -1,12 +1,12 @@
 (ns combo.unit.util.attr
   (:require [combo.unit.util.event :as event]))
 
-(defn basic [{:keys [spec element-id class attrs] :as m}]
-  (into {:id element-id :className class}
+(defn basic [{:keys [spec class attrs] :as m}]
+  (into {:id (:element-id spec) :className class}
     (when attrs (attrs m spec))))
 
 (defn field [{:keys [spec disabled]}]
-  {:name spec
+  {:name (:name spec)
    :disabled disabled})
 
 (defn value [{:keys [spec value local! input!]}]
