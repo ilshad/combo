@@ -1,6 +1,5 @@
 (ns combo-demo.presentation
   (:require [combo.api :as combo]
-            [cljs.core.async :as async]
             [cljs.core.match :refer-macros [match]]
             [om-tools.dom :as dom :include-macros true]
             [om.core :as om :include-macros true]))
@@ -108,7 +107,7 @@
                     (when (= (:id i) (:active m))
                       " active"))
            :on-click (fn [e]
-                       (async/put! (:input-chan m) [:thumbs :click (:id i)])
+                       ((:input! m) [:thumbs :click (:id i)])
                        (.preventDefault e))})))))
 
 (defn render-canvas [m]

@@ -1,21 +1,17 @@
-(ns combo.unit.util.event
-  (:require [cljs.core.async :as async]))
+(ns combo.unit.util.event)
 
-(defn on-change [local-chan]
-  #(async/put! local-chan (.. % -target -value)))
-
-(defn focus? [input-chan id yes?]
+(defn focus? [input! id yes?]
   (fn [e]
-    (async/put! input-chan [id :focus? yes?])
+    (input! [id :focus? yes?])
     (.preventDefault e)))
 
 (defn return-key-code
-  [{:keys [id key input-chan filter-codes-set capture-codes-set]}]
+  [{:keys [id key input! filter-codes-set capture-codes-set]}]
   (fn [e]
     (let [k (.-keyCode e)
           return? (if filter-codes-set (filter-codes-set k) true)]
       (when return?
-        (async/put! input-chan [id key k]))
+        (input! [id key k]))
       (when (capture-codes-set k)
         (.preventDefault e)))))
 

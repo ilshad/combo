@@ -35,16 +35,21 @@
         (commit {:chan out :data data :owner owner :message message}))
       (recur))))
 
-(defn- default-extern [input owner]
+(defn- input! [owner]
+  (partial async/put! (om/get-state owner :input-chan)))
+
+(defn- local! [owner]
+  (partial async/put! (om/get-state owner :local-chan)))
+
+(defn- default-extern [input! owner]
   (when-let [c (om/get-state owner :extern-chan)]
     (go-loop []
-      (input (async/<! c))
+      (input! (async/<! c))
       (recur))))
 
 (defn- setup-extern [_ owner spec]
-  (let [extern (:extern spec default-extern)
-        input (partial async/put! (om/get-state owner :input-chan))]
-    (extern input owner)))
+  (let [extern (:extern spec default-extern)]
+    (extern (input! owner) owner)))
 
 (defn- wrap-debug [spec behavior]
   (fn [state event]
@@ -128,7 +133,9 @@
         (wrap state
           (render (assoc state
                     :spec spec
-                    :units (nested data owner spec))))))))
+                    :units (nested data owner spec)
+                    :input! (input! owner)
+                    :local! (local! owner))))))))
 
 (defn view [data owner spec]
   (reify

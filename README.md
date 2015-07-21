@@ -32,16 +32,15 @@ describe them as units in a declarative spec:
 where `:render` is a function:
 
 ```clojure
-(defn foo [m]
-  (dom/input #js {:className (:class m)}
+(defn foo [{:keys [input! class]}]
+  (dom/input #js {:className class}
                   :onChange (fn [e]
-				              (let [chan (:input-chan m)
-						            x (.. % -target -value)]
-	                            (async/put! chan [:foo x])))))
+				              (let [x (.. % -target -value)]
+	                            (input! [:foo x])))))
 ```
 
-The messages sent from render function to behavior through
-`input-chan`. It is up to developer of render function to decide what
+The messages sent from render function to behavior with `:input!`
+procedure. It is up to developer of render function to decide what
 is the actual format of these messages. They are collected as
 input in behavior, so you have to build control flow on them:
 
