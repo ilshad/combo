@@ -2,86 +2,79 @@
   (:require [om.dom :as dom :include-macros true]
             [combo.unit.util.attr :as attr]))
 
-(defn input [state spec]
+(defn input [m]
   (dom/input
     (clj->js
-      (merge (attr/field state spec)
-             (attr/value state spec)
-             (attr/input state spec)
-             (attr/onkey state spec)
-             (attr/basic state spec)))))
+      (merge (attr/field m)
+             (attr/value m)
+             (attr/input m)
+             (attr/onkey m)
+             (attr/basic m)))))
 
-(defn textarea [state spec]
+(defn textarea [m]
   (dom/textarea
     (clj->js
-      (merge (attr/field state spec)
-             (attr/value state spec)
-             (attr/onkey state spec)
-             (attr/basic state spec)))))
+      (merge (attr/field m)
+             (attr/value m)
+             (attr/onkey m)
+             (attr/basic m)))))
 
-(defn select [state spec]
+(defn select [m]
   (apply dom/select
     (clj->js
-      (merge (attr/field state spec)
-             (attr/value state spec)
-             (attr/onkey state spec)
-             (attr/basic state spec)))
-    (for [[k v] (:options state)]
+      (merge (attr/field m)
+             (attr/value m)
+             (attr/onkey m)
+             (attr/basic m)))
+    (for [[k v] (:options m)]
       (dom/option #js {:value k} v))))
 
-(defn checkbox [state spec]
+(defn checkbox [m]
   (dom/input
     (clj->js
-      (merge (attr/field state spec)
-             (attr/check state spec)
-             (attr/onkey state spec)
-             (attr/basic state spec)))))
+      (merge (attr/field m)
+             (attr/check m)
+             (attr/onkey m)
+             (attr/basic m)))))
 
-(defn button [state spec]
+(defn button [m]
   (dom/button
     (clj->js
-      (merge (attr/field state spec)
-             (attr/click state spec)
-             (attr/onkey state spec)
-             (attr/basic state spec)))
-    (:value state)))
+      (merge (attr/field m)
+             (attr/click m)
+             (attr/onkey m)
+             (attr/basic m)))
+    (:value m)))
 
-(defn form [state spec units]
+(defn form [m]
   (apply dom/form
     (clj->js
-      (merge (attr/form  state spec)
-             (attr/onkey state spec)
-             (attr/basic state spec)))
-    units))
+      (merge (attr/form  m)
+             (attr/onkey m)
+             (attr/basic m)))
+    (:units m)))
 
-(defn a [state spec]
+(defn a [m]
   (dom/a
     (clj->js
-      (merge (attr/click state spec)
-             (attr/onkey state spec)
-             (attr/basic state spec)
-             {:href (:href spec "#")}))
-    (:value state)))
+      (merge (attr/click m)
+             (attr/onkey m)
+             (attr/basic m)
+             {:href (:href (:spec m) "#")}))
+    (:value m)))
 
-(defn span [state spec]
+(defn span [m]
   (dom/span
     (clj->js
-      (merge (attr/onkey state spec)
-             (attr/basic state spec)))
-    (:value state)))
+      (merge (attr/onkey m)
+             (attr/basic m)))
+    (:value m)))
 
-(defn div
-  ([state spec]
-   (dom/div
-     (clj->js
-       (merge (attr/click state spec)
-              (attr/onkey state spec)
-              (attr/basic state spec)))
-     (:value state)))
-
-  ([state spec units]
-   (apply dom/div
-     (clj->js
-       (merge (attr/onkey state spec)
-              (attr/basic state spec)))
-     units)))
+(defn div [m]
+  (apply dom/div
+    (clj->js
+      (merge (attr/click m)
+             (attr/onkey m)
+             (attr/basic m)))
+    (or (:value m)
+        (:units m))))

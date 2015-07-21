@@ -32,10 +32,12 @@ describe them as units in a declarative spec:
 where `:render` is a function:
 
 ```clojure
-(defn foo [{:keys [class input-chan]} spec]
-  (dom/input #js {:className class}
-                  :onChange #(async/put! input-chan
-					           [:foo (.. % -target -value)])}))
+(defn foo [m]
+  (dom/input #js {:className (:class m)}
+                  :onChange (fn [e]
+				              (let [chan (:input-chan m)
+						            x (.. % -target -value)]
+	                            (async/put! chan [:foo x])))))
 ```
 
 The messages sent from render function to behavior through

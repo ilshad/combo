@@ -86,12 +86,10 @@
     (om/build unit data
       (unit-params data owner (control layout spec) layout))))
 
-(defn- render-unit [owner spec nested]
-  (let [f (:render spec)
-        s (om/get-state owner)]
-    (if (empty? nested)
-      (f s spec)
-      (f s spec nested))))
+(defn- nested [data owner spec]
+  (let [nested (map (build data owner (:layout spec)) (:units spec))]
+    (when-not (empty? nested)
+      nested)))
 
 (defn- unit [data owner spec]
   (reify
@@ -123,12 +121,14 @@
              (om/set-state! owner key value)))
           (recur))))
 
-    om/IRender
-    (render [_]
+    om/IRenderState
+    (render-state [_ state]
       (let [wrap (:wrap spec (fn [_ x] x))
-            nested (map (build data owner (:layout spec)) (:units spec))
-            content (render-unit owner spec nested)]
-        (wrap (om/get-state owner) content)))))
+            render (:render spec)]
+        (wrap state
+          (render (assoc state
+                    :spec spec
+                    :units (nested data owner spec))))))))
 
 (defn view [data owner spec]
   (reify

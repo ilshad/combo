@@ -99,21 +99,22 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Render
 
-(defn render-thumbs [{:keys [items active input-chan]} _]
+(defn render-thumbs [m]
   (dom/div {:class "thumbs col-xs-2"}
     (dom/div {:class "thumbs-inner"}
-      (for [i items]
+      (for [i (:items m)]
         (inner-html (:content i)
           {:class (str "thumb"
-                    (when (= (:id i) active)
+                    (when (= (:id i) (:active m))
                       " active"))
            :on-click (fn [e]
-                       (async/put! input-chan [:thumbs :click (:id i)])
+                       (async/put! (:input-chan m) [:thumbs :click (:id i)])
                        (.preventDefault e))})))))
 
-(defn render-canvas [{:keys [value]} _]
+(defn render-canvas [m]
   (dom/div {:class "workspace col-xs-10"}
-    (inner-html value {:id "canvas" :class "canvas" :contentEditable ""})))
+    (inner-html (:value m)
+      {:id "canvas" :class "canvas" :contentEditable ""})))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Spec

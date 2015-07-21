@@ -2,61 +2,56 @@
   (:require [cljs.core.async :as async]
             [combo.unit.util.event :as event]))
 
-(defn basic [state spec]
-  (into {:id (:element-id spec) :className (:class state)}
-    (when-let [attrs (:attrs spec)]
-      (attrs state spec))))
+(defn basic [{:keys [spec element-id class attrs] :as m}]
+  (into {:id element-id :className class}
+    (when attrs (attrs m spec))))
 
-(defn field [state spec]
-  {:name      (:name spec)
-   :disabled  (:disabled state)})
+(defn field [{:keys [spec disabled]}]
+  {:name spec
+   :disabled disabled})
 
-(defn value [state spec]
-  {:value     (:value state)
-   :onChange  (event/on-change state)
-   :onFocus   (event/focus? state (:id spec) true)
-   :onBlur    (event/focus? state (:id spec) false)})
+(defn value [{:keys [spec value local-chan input-chan]}]
+  {:value value
+   :onChange (event/on-change local-chan)
+   :onFocus (event/focus? input-chan (:id spec) true)
+   :onBlur (event/focus? input-chan (:id spec) false)})
 
-(defn input [state spec]
-  {:type        (:type spec)
+(defn input [{:keys [spec]}]
+  {:type (:type spec)
    :placeholder (:placeholder spec)})
 
-(defn check [state spec]
-  {:type     "checkbox"
-   :checked  (:value state)
-   :onChange (fn [e]
-               (async/put! (:local-chan state)
-                 (.. e -target -checked)))})
+(defn check [{:keys [value local-chan]}]
+  {:type "checkbox"
+   :checked  value
+   :onChange #(async/put! local-chan (.. % -target -checked))})
 
-(defn click [state spec]
+(defn click [{:keys [spec input-chan]}]
   {:onClick (fn [e]
-              (async/put! (:input-chan state)
-                [(:id spec) :click (event/event-keys e)])
+              (async/put! input-chan [(:id spec) :click (event/event-keys e)])
               (.preventDefault e))})
 
-(defn form [state spec]
+(defn form [{:keys [spec input-chan]}]
   {:method (:method spec)
    :action (:action spec)
    :onSubmit (fn [e]
-               (async/put! (:input-chan state)
-                 [(:id spec) :submit true])
+               (async/put! input-chan [(:id spec) :submit true])
                (.preventDefault e))})
 
-(defn onkey [state spec]
+(defn onkey [{:keys [spec input-chan]}]
   (merge {}
     (when (:return-key-up? spec)
       {:onKeyUp
        (event/return-key-code
-         {:state state
-          :id (:id spec)
+         {:id (:id spec)
           :key :key-up
+          :input-chan input-chan
           :filter-codes-set (:filter-key-down spec)
           :capture-codes-set (:capture-key-up spec #{})})})
     (when (:return-key-down? spec)
       {:onKeyDown
        (event/return-key-code
-         {:state state
-          :id (:id spec)
+         {:id (:id spec)
           :key :key-down
+          :input-chan input-chan
           :filter-codes-set (:filter-key-down spec)
           :capture-codes-set (:capture-key-down spec #{})})})))
