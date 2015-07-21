@@ -1,6 +1,7 @@
 (ns dev.core
   (:require [combo.api :as combo]
             [cljs.core.match :refer-macros [match]]
+            [plumbing.core :refer-macros [defnk]]
             [om-tools.dom :as dom :include-macros true]
             [om.core :as om :include-macros true]))
 
@@ -15,18 +16,9 @@
     (interpose "/ "
       (vals (select-keys state [:user :city :note])))))
 
-(defn commit [args]
-  (println "Received commit message from Combo:" (:message args)))
-
-(defn extern [return _]
-  (set! js/document.body.onkeydown
-    (fn [e]
-      (when (= e.target js/document.body)
-        (return [:extern/shortcut :keycode e.keyCode])))))
-
 (defn behavior [state message]
   (match message
-
+    
     [:enable _ value]
     [state [[:note :disabled (not value)]]]
     
@@ -46,6 +38,15 @@
     [state [[:combo/commit :note (display-result state)]]]
 
     :else [state []]))
+
+(defnk extern [input!]
+  (set! js/document.body.onkeydown
+    (fn [e]
+      (when (= e.target js/document.body)
+        (input! [:extern/shortcut :keycode e.keyCode])))))
+
+(defnk commit [message]
+  (println "Just received commit message:" message))
 
 (def units
   [{:id :group
@@ -86,8 +87,8 @@
 
 (defn view [data]
   (om/build combo/view data
-    {:opts {:commit commit
-            :debug? true
+    {:opts {:debug? true
+            :commit commit
             :extern extern
             :behavior behavior
             :layout combo/bootstrap-layout

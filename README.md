@@ -2,7 +2,7 @@
 
 [![Clojars Project](http://clojars.org/combo/latest-version.svg)](http://clojars.org/combo)
 
-[Combo Demo: simple Spreadsheet (~120 LOC) and Presentation Authoring (~130 LOC)](http://ilshad.com/combo)
+[Combo Demo: simple Spreadsheet and Presentation Authoring](http://ilshad.com/combo)
 
 ## What It Is
 

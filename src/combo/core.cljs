@@ -17,9 +17,9 @@
     (control [_ spec]
       spec)))
 
-(defn- default-commit [{:keys [chan data owner message]}]
-  (when chan
-    (async/put! chan message))
+(defn- default-commit [{:keys [commit-chan data message]}]
+  (when commit-chan
+    (async/put! commit-chan message))
   (when data
     (let [[_ attr value] message]
       (om/update! data attr value))))
@@ -27,12 +27,14 @@
 (defn- setup-commit [data owner spec]
   (let [commit (:commit spec default-commit)
         pub    (om/get-state owner :output-pub)
-        in     (om/get-state owner :intern-chan)
-        out    (om/get-state owner :commit-chan)]
+        in     (om/get-state owner :intern-chan)]
     (async/sub pub :combo/commit in)
     (go-loop []
       (let [message (async/<! in)]
-        (commit {:chan out :data data :owner owner :message message}))
+        (commit
+          (assoc (om/get-state owner)
+            :message message
+            :data data)))
       (recur))))
 
 (defn- input! [owner]
@@ -41,15 +43,15 @@
 (defn- local! [owner]
   (partial async/put! (om/get-state owner :local-chan)))
 
-(defn- default-extern [input! owner]
-  (when-let [c (om/get-state owner :extern-chan)]
+(defn- default-extern [{:keys [input! extern-chan]}]
+  (when extern-chan
     (go-loop []
-      (input! (async/<! c))
+      (input! (async/<! extern-chan))
       (recur))))
 
-(defn- setup-extern [_ owner spec]
+(defn- setup-extern [owner spec]
   (let [extern (:extern spec default-extern)]
-    (extern (input! owner) owner)))
+    (extern (assoc (om/get-state owner) :input! (input! owner)))))
 
 (defn- wrap-debug [spec behavior]
   (fn [state event]
@@ -60,7 +62,7 @@
         (println "=>" new-state " :: " messages))
       [new-state messages])))
 
-(defn- setup-behavior [data owner spec]
+(defn- setup-behavior [owner spec]
   (let [behavior (wrap-debug spec (:behavior spec (fn [s _] [s []])))
         input-chan (om/get-state owner :input-chan)
         output-chan (om/get-state owner :output-chan)]
@@ -68,8 +70,10 @@
       (let [[new-state messages] (behavior state (async/<! input-chan))]
         (doseq [m messages]
           (async/>! output-chan m))
-        (recur new-state)))
-    (async/put! input-chan [:combo/init :data data])))
+        (recur new-state)))))
+
+(defn- init-behavior [data owner]
+  (async/put! (om/get-state owner :input-chan) [:combo/init :data data]))
 
 (defn- unit-init-state [data spec]
   (let [props #(select-keys % [:value :options :class :disabled])]
@@ -131,11 +135,12 @@
       (let [wrap (:wrap spec (fn [_ x] x))
             render (:render spec)]
         (wrap state
-          (render (assoc state
-                    :spec spec
-                    :units (nested data owner spec)
-                    :input! (input! owner)
-                    :local! (local! owner))))))))
+          (render
+            (assoc state
+              :spec spec
+              :units (nested data owner spec)
+              :input! (input! owner)
+              :local! (local! owner))))))))
 
 (defn view [data owner spec]
   (reify
@@ -150,10 +155,14 @@
 
     om/IWillMount
     (will-mount [_]
-      (setup-commit   data owner spec)
-      (setup-extern   data owner spec)
-      (setup-behavior data owner spec))
+      (setup-commit data owner spec)
+      (setup-extern      owner spec)
+      (setup-behavior    owner spec))
 
+    om/IDidMount
+    (did-mount [_]
+      (init-behavior data owner))
+    
     om/IRender
     (render [_]
       (let [layout (:layout spec default-layout)]
