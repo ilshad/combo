@@ -52,11 +52,9 @@ input in behavior, so you have to build control flow on them:
 	:else [state []]))
 ```
 
-Outcoming messsages (from behavior) should be triplets:
-
-- unit id,
-- unit local state key,
-- unit local state value.
+Outcoming messsages (from behavior) should be triplets
+`[unit-id, key, value]`, and the value will appear under the key as
+input to the corresponding render function.
 
 In other words, instead of writing full Om components, we have to code
 only rendering part and manage state with kind of event hub.
@@ -110,7 +108,7 @@ Om components, but also, it is possible to develop apps entirely with Combo.
 ## Getting started
 
 1. Start with [Tutorial](http://github.com/ilshad/combo/wiki/Tutorial).
-2. Take a look at source code of [Demo](http://ilshad.com/combo).
+2. Take a look at source code of [Demo](http://ilshad.com/combo/).
 3. Write your code using [API Documentation](https://github.com/ilshad/combo/wiki/API).
 
 Full documentation is [here](http://github.com/ilshad/combo/wiki).
