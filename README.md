@@ -107,9 +107,12 @@ Om components, but also, it is possible to develop apps entirely with Combo.
 
 ## Getting started
 
-1. Start with [Tutorial](http://github.com/ilshad/combo/wiki/Tutorial).
+1. Start with [Tutorial](http://github.com/ilshad/combo/wiki/Tutorial)
+   (this is not started yet).
 2. Take a look at source code of [Demo](http://ilshad.com/combo/).
-3. Write your code using [API Documentation](https://github.com/ilshad/combo/wiki/API).
+3. Write your code using
+[API Documentation](https://github.com/ilshad/combo/wiki/API)
+	(this is not started yet).
 
 Full documentation is [here](http://github.com/ilshad/combo/wiki).
 
