@@ -12,14 +12,14 @@
 (set-env!
   :source-paths #{"src"}
   :resource-paths #{"src"}
-  :dependencies '[[org.clojure/clojure       "1.7.0-beta1" :scope "provided"]
-                  [org.clojure/clojurescript "0.0-3196"    :scope "provided"]
+  :dependencies '[[org.clojure/clojure       "1.7.0" :scope "provided"]
+                  [org.clojure/clojurescript "0.0-3308"    :scope "provided"]
                   [org.clojure/core.async    "0.1.346.0-17112a-alpha"
                                                      :scope "provided"]
-                  [org.omcljs/om             "0.8.8" :scope "provided"]
+                  [org.omcljs/om             "0.9.0" :scope "provided"]
 
-                  [adzerk/boot-cljs          "0.0-2814-4"     :scope "test"]
-                  [adzerk/boot-reload        "0.2.6"          :scope "test"]
+                  [adzerk/boot-cljs          "0.0-3308-0"     :scope "test"]
+                  [adzerk/boot-reload        "0.3.1"          :scope "test"]
                   [adzerk/boot-cljs-repl     "0.1.9"          :scope "test"]
                   [pandeiro/boot-http        "0.6.3-SNAPSHOT" :scope "test"]
                   [adzerk/bootlaces          "0.1.11"         :scope "test"]])
@@ -39,7 +39,7 @@
     :source-paths #{"dev"}
     :resource-paths #{"dev"}
     :dependencies '[[org.clojure/core.match "0.3.0-alpha4"]
-                    [prismatic/om-tools "0.3.10"]]))
+                    [prismatic/om-tools "0.3.11"]]))
 
 (deftask dev []
   (dev-env!)
