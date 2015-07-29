@@ -17,6 +17,12 @@
     (control [_ spec]
       spec)))
 
+(defn- input! [owner]
+  (partial async/put! (om/get-state owner :input-chan)))
+
+(defn- local! [owner]
+  (partial async/put! (om/get-state owner :local-chan)))
+
 (defn- default-commit [{:keys [commit-chan data message]}]
   (when commit-chan
     (async/put! commit-chan message))
@@ -33,15 +39,10 @@
       (let [message (async/<! in)]
         (commit
           (assoc (om/get-state owner)
+            :input! (input! owner)
             :message message
             :data data)))
       (recur))))
-
-(defn- input! [owner]
-  (partial async/put! (om/get-state owner :input-chan)))
-
-(defn- local! [owner]
-  (partial async/put! (om/get-state owner :local-chan)))
 
 (defn- default-extern [{:keys [input! extern-chan]}]
   (when extern-chan
