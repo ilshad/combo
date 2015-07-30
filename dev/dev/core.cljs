@@ -64,6 +64,7 @@
                       :value "Clear"}]}]}
    {:id :city
     :pretty? true
+    :label "Select city:"
     :return-key-down? true
     :capture-key-down #{13}
     :render combo/select}

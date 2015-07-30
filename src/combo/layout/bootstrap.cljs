@@ -26,7 +26,7 @@
                         (dom/label nil content (:label spec))))
                     (dom/div #js {:className (str "form-group " cls)}
                       (when-let [label (:label spec)]
-                        (dom/label label))
+                        (dom/label nil label))
                       content)))
                 content))))
         
