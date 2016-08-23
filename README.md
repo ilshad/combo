@@ -1,6 +1,6 @@
 # Combo: message driven component for Om
 
-[![Clojars Project](http://clojars.org/combo/latest-version.svg)](http://clojars.org/ilshad/combo)
+[![Clojars Project](http://clojars.org/ilshad/combo/latest-version.svg)](http://clojars.org/ilshad/combo)
 
 [Combo Demo: simple Spreadsheet and Presentation Authoring](http://ilshad.com/combo)
 
