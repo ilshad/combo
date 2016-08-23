@@ -1,7 +1,7 @@
-(def +version+ "0.3.2-SNAPSHOT")
+(def +version+ "0.3.2")
 
 (task-options!
-  pom {:project     'combo
+  pom {:project     'ilshad/combo
        :version     +version+
        :description "Message driven component for Om"
        :url         "https://github.com/ilshad/combo"
